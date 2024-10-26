@@ -1,0 +1,12 @@
+name = "emoji-recommend-workers"
+main = "src/index.ts"
+compatibility_date = "2024-10-26"
+compatibility_flags = [ "nodejs_compat" ]
+
+[[vectorize]]
+binding = "VECTORIZE"
+index_name = "jphack"
+
+[observability]
+enabled = true
+head_sampling_rate = 1
