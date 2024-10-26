@@ -38,7 +38,74 @@ app.event("message", async ({ body, context }) => {
       // メッセージを返信
       await context.client.chat.postMessage({
         channel: event.channel, // 送信元のチャンネルID
-        text: `あなたが送ったメッセージ: "${userMessage}"`, // 返信の内容
+        text: `あなたが送ったメッセージ: "${userMessage}"`, // textは絶対に含めないとダメらしい
+        blocks: [
+          {
+            "type": "section",
+            "block_id": "reactions_section",
+            "text": {
+              "type": "mrkdwn",
+              "text": "おすすめのリアクションはこちら:sparkles:"
+            }
+          },
+          {
+            "type": "actions",
+            "block_id": "reactions_buttons",
+            "elements": [
+              {
+                "type": "button",
+                "text": {
+                  "type": "plain_text",
+                  "text": ":justdoit_1:",
+                  "emoji": true
+                },
+                "value": "thumbs_up"
+              },
+              {
+                "type": "button",
+                "text": {
+                  "type": "plain_text",
+                  "text": ":tokuniomae:",
+                  "emoji": true
+                },
+                "value": "heart"
+              },
+              {
+                "type": "button",
+                "text": {
+                  "type": "plain_text",
+                  "text": ":ningen_is_oroka:",
+                  "emoji": true
+                },
+                "value": "heart"
+              },
+              {
+                "type": "button",
+                "text": {
+                  "type": "plain_text",
+                  "text": ":ultrafastparrot:",
+                  "emoji": true
+                },
+                "value": "clap"
+              }
+            ]
+          },
+          {
+            "type": "actions",
+            "elements": [
+              {
+                "type": "button",
+                "text": {
+                  "type": "plain_text",
+                  "text": "おすすめを非表示",
+                  "emoji": true
+                },
+                "action_id": "hide_reactions",
+                "value": "hide"
+              }
+            ]
+          }
+        ]
       });
       console.log("Message sent successfully.");
     } catch (error) {
