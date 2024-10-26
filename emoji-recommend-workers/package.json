@@ -1,7 +1,7 @@
 {
   "name": "emoji-recommend-workers",
   "scripts": {
-    "dev": "wrangler dev",
+    "dev": "wrangler dev --remote",
     "deploy": "wrangler deploy --minify"
   },
   "dependencies": {
