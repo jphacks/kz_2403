@@ -43,11 +43,14 @@ serve(async (req) => {
       });
     }
 
+    console.log("リアクション取得結果:", reactions);
+
     let points = 0;
+    let reactionIndex = -1;
 
     // リアクションの順番に基づいてポイントを設定
     if (reactions.length > 0) {
-      const reactionIndex = reactions.findIndex(
+      reactionIndex = reactions.findIndex(
         (reaction) => reaction.reaction_user_id === reactionUserId
       );
 
@@ -55,8 +58,12 @@ serve(async (req) => {
         points = 3;
       } else if (reactionIndex === 1) {
         points = 2;
+      } else {
+        points = 1;
       }
     }
+
+    console.log(`リアクションの順番: ${reactionIndex + 1}, 付与ポイント: ${points}`);
 
     // 現在のtotal_pointを取得して加算
     const { data: user, error: userError } = await supabase
@@ -73,8 +80,10 @@ serve(async (req) => {
       });
     }
 
-    // 新しいポイントの計算
-    const newTotalPoints = (user?.total_point || 0) + points;
+    const currentTotalPoints = user?.total_point || 0;
+    const newTotalPoints = currentTotalPoints + points;
+
+    console.log(`現在のtotal_point: ${currentTotalPoints}, 新しいtotal_point: ${newTotalPoints}`);
 
     // 更新処理
     const { error: updateError } = await supabase
@@ -90,8 +99,15 @@ serve(async (req) => {
       });
     }
 
+    console.log(`ユーザーID: ${reactionUserId} に ${points} ポイントを加算し、total_pointを更新しました`);
+
     return new Response(
-      JSON.stringify({ message: "ポイント付与成功", points }),
+      JSON.stringify({
+        message: "ポイント付与成功",
+        reactionIndex: reactionIndex + 1,
+        points,
+        newTotalPoints,
+      }),
       {
         status: 200,
         headers: { "Access-Control-Allow-Origin": "*" },
