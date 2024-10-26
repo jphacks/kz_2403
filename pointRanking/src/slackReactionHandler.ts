@@ -21,6 +21,7 @@ import { ReactionData, saveReactionData } from "./saveReaction";
     // リアクションを受けたメッセージの送信者のIDを取得
     let messageUserId = "unknown_user"; //初期値
     let userName = "unknown_user"; //初期値
+    let messageText = "unknown"; //初期値
 
     try {
       // メッセージ情報を取得して、送信者のIDを取得
@@ -32,7 +33,9 @@ import { ReactionData, saveReactionData } from "./saveReaction";
       });
 
       if (result.messages && result.messages.length > 0) {
+        const message = result.messages[0];
         messageUserId = result.messages[0].user || "unknown_user";
+        messageText = message.text || "unknown";
       }
     } catch (error) {
       console.error("メッセージ取得", error);
@@ -56,7 +59,7 @@ import { ReactionData, saveReactionData } from "./saveReaction";
       userId: reactionUserId,
       userName,
       messageId,
-      messageText: "unknown",
+      messageText,
       messageUserId,
       channelId,
       reactionUserId,
