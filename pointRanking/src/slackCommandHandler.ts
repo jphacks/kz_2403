@@ -1,19 +1,18 @@
-import { App } from "@slack/bolt";
-import { useSupabase } from "./hooks/useSupabase";
 import { useSlackbot } from "./hooks/useSlackbot";
+import { useSupabase } from "./hooks/useSupabase";
 
-const { supabase } = useSupabase();
 const { slackBot, PORT } = useSlackbot();
+const { supabase } = useSupabase();
 
 // 月間ランキングのスラッシュコマンド
 slackBot.command("/monthranking", async ({ command, ack, client }) => {
-  try {
-    // コマンドの受信ACKを即座に返す
-    await ack();
-    console.log("monthRankingコマンドが実行されました");
+  // コマンドの受信ACKを即座に返す
+  await ack();
+  console.log("monthRankingコマンドが実行されました");
 
-    // 非同期処理でデータを取得してSlackに送信
-    (async () => {
+  // 非同期処理でデータを取得してSlackに送信
+  (async () => {
+    try {
       // 現在の月を取得
       const currentMonth = new Date().toISOString().slice(0, 7); // YYYY-MM形式
 
@@ -75,25 +74,25 @@ slackBot.command("/monthranking", async ({ command, ack, client }) => {
         channel: command.channel_id,
         text: `今月のポイントランキング\n${rankingText}`,
       });
-    })(); // 即時実行
-  } catch (error) {
-    console.error("ポイントランキング取得エラー:", error);
-    await client.chat.postMessage({
-      channel: command.channel_id,
-      text: "データの取得に失敗しました",
-    });
-  }
+    } catch (error) {
+      console.error("ポイントランキング取得エラー:", error);
+      await client.chat.postMessage({
+        channel: command.channel_id,
+        text: "データの取得に失敗しました",
+      });
+    }
+  })(); // 即時実行
 });
 
 // 総合ランキングのスラッシュコマンド
 slackBot.command("/totalranking", async ({ command, ack, client }) => {
-  try {
-    // コマンドの受信ACKを即座に返す
-    await ack();
-    console.log("totalRankingコマンドが実行されました");
+  // コマンドの受信ACKを即座に返す
+  await ack();
+  console.log("totalRankingコマンドが実行されました");
 
-    // SupabaseのUserテーブルからポイントランキングを取得
-    (async () => {
+  // 非同期処理でデータを取得してSlackに送信
+  (async () => {
+    try {
       const { data: rankingData, error } = await supabase
         .from("User")
         .select("user_id, user_name, total_point")
@@ -121,27 +120,27 @@ slackBot.command("/totalranking", async ({ command, ack, client }) => {
         channel: command.channel_id,
         text: `総合ポイントランキング\n${rankingText}`,
       });
-    })();
-  } catch (error) {
-    console.error("ポイントランキング取得エラー:", error);
-    await client.chat.postMessage({
-      channel: command.channel_id,
-      text: "データの取得に失敗しました",
-    });
-  }
+    } catch (error) {
+      console.error("ポイントランキング取得エラー:", error);
+      await client.chat.postMessage({
+        channel: command.channel_id,
+        text: "データの取得に失敗しました",
+      });
+    }
+  })(); // 即時実行
 });
 
 // 自分の順位を表示するスラッシュコマンド
 slackBot.command("/myranking", async ({ command, ack, client }) => {
-  try {
-    // コマンドの受信ACKを即座に返す
-    await ack();
-    console.log("myRankingコマンドが実行されました");
+  // コマンドの受信ACKを即座に返す
+  await ack();
+  console.log("myRankingコマンドが実行されました");
 
-    const userId = command.user_id;
+  const userId = command.user_id;
 
-    // SupabaseのUserテーブルから全ユーザーのポイントを取得
-    (async () => {
+  // 非同期処理でデータを取得してSlackに送信
+  (async () => {
+    try {
       const { data: rankingData, error } = await supabase
         .from("User")
         .select("user_id, user_name, total_point")
@@ -169,15 +168,15 @@ slackBot.command("/myranking", async ({ command, ack, client }) => {
         user: userId,
         text: `あなたの現在の順位は ${userRanking}位 です。ポイント: ${userPoints}pt`,
       });
-    })();
-  } catch (error) {
-    console.error("ポイントランキング取得エラー:", error);
-    await client.chat.postEphemeral({
-      channel: command.channel_id,
-      user: command.user_id,
-      text: "データの取得に失敗しました",
-    });
-  }
+    } catch (error) {
+      console.error("ポイントランキング取得エラー:", error);
+      await client.chat.postEphemeral({
+        channel: command.channel_id,
+        user: userId,
+        text: "データの取得に失敗しました",
+      });
+    }
+  })(); // 即時実行
 });
 
 // アプリの起動
