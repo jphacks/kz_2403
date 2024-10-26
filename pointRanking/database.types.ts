@@ -1,11 +1,4 @@
-[?25l
-    Select a project:                                                                                                
-                                                                                                                     
-  >  1. pmuyoodzkluhaucxcaxm [name: JPHACKS-BusStop2024's Project, org: dseffihkygthvftcdowx, region: ap-southeast-1]
-                                                                                                                     
-                                                                                                                     
-    ↑/k up • ↓/j down • / filter • q quit • ? more                                                                   
-                                                                                                                     [0D[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[0D[2K [0D[2K[?25h[?1002l[?1003l[?1006lexport type Json =
+export type Json =
   | string
   | number
   | boolean
@@ -18,30 +11,41 @@ export type Database = {
     Tables: {
       Emoji: {
         Row: {
-          add_user_id: string
+          add_user_id: string | null
           created_at: string
           emoji_id: string
           emoji_name: string
+          label: string | null
           updated_at: string
           usage_num: number
         }
         Insert: {
-          add_user_id?: string
+          add_user_id?: string | null
           created_at?: string
           emoji_id: string
           emoji_name: string
+          label?: string | null
           updated_at?: string
           usage_num?: number
         }
         Update: {
-          add_user_id?: string
+          add_user_id?: string | null
           created_at?: string
           emoji_id?: string
           emoji_name?: string
+          label?: string | null
           updated_at?: string
           usage_num?: number
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "Emoji_add_user_id_fkey"
+            columns: ["add_user_id"]
+            isOneToOne: false
+            referencedRelation: "User"
+            referencedColumns: ["user_id"]
+          },
+        ]
       }
       Message: {
         Row: {
