@@ -1,4 +1,4 @@
-import { useSlackbot } from "./hooks/useSlackbot"
+import { useSlackbot } from "./hooks/useSlackbot";
 import { useSupabase } from "./hooks/useSupabase";
 import { ReactionData, saveReactionData } from "./saveReaction";
 
@@ -6,13 +6,13 @@ import { ReactionData, saveReactionData } from "./saveReaction";
 (async () => {
   const { slackBot, PORT } = useSlackbot();
   const { edgeFunctionUrl, serviceRoleKey } = useSupabase();
-  
+
   // Slackリアクションが追加された時の処理
-  slackBot.event('reaction_added', async ({ event, client }) => {
+  slackBot.event("reaction_added", async ({ event, client }) => {
     const { reaction, user, item, event_ts } = event;
     // DBに合わせて各種プロパティを変換
     const messageId = item.ts;
-    const createdAt = new Date(parseInt(event_ts)*1000).toISOString(); // 人間に読める形にするため
+    const createdAt = new Date(parseInt(event_ts) * 1000).toISOString(); // 人間に読める形にするため
     const reactionUserId = user;
     const emojiName = reaction;
     const emojiId = `emoji-${emojiName}`;
@@ -34,15 +34,18 @@ import { ReactionData, saveReactionData } from "./saveReaction";
       if (result.messages && result.messages.length > 0) {
         messageUserId = result.messages[0].user || "unknown_user";
       }
-    } catch(error) {
+    } catch (error) {
       console.error("メッセージ取得", error);
     }
 
     // ユーザー情報を取得し、ユーザー名を取得
-    try{
+    try {
       const userInfo = await client.users.info({ user: reactionUserId });
       if (userInfo.user && userInfo.user.profile) {
-        userName = userInfo.user.profile.real_name || userInfo.user.profile.display_name || "unknown";
+        userName =
+          userInfo.user.profile.real_name ||
+          userInfo.user.profile.display_name ||
+          "unknown";
       }
     } catch (error) {
       console.error("ユーザー情報取得", error);
@@ -77,7 +80,7 @@ import { ReactionData, saveReactionData } from "./saveReaction";
             method: "POST",
             headers: {
               "Content-Type": "application/json",
-              "Authorization": `Bearer ${serviceRoleKey}`,
+              Authorization: `Bearer ${serviceRoleKey}`,
             },
             body: JSON.stringify({ messageId, reactionUserId }),
           });

@@ -88,18 +88,16 @@ export async function saveReactionData({
     }
 
     // Reactionテーブルの更新
-    const { error: reactionError } = await supabase
-      .from("Reaction")
-      .upsert(
-        {
-          reaction_id: reactionId,
-          created_at: new Date().toISOString(),
-          message_id: messageId,
-          reaction_user_id: reactionUserId,
-          emoji_id: emojiId,
-        },
-        { onConflict: "reaction_id" }
-      );
+    const { error: reactionError } = await supabase.from("Reaction").upsert(
+      {
+        reaction_id: reactionId,
+        created_at: new Date().toISOString(),
+        message_id: messageId,
+        reaction_user_id: reactionUserId,
+        emoji_id: emojiId,
+      },
+      { onConflict: "reaction_id" }
+    );
 
     if (reactionError) {
       console.error("Reactionテーブルの更新エラー:", reactionError);
@@ -164,18 +162,16 @@ export async function saveReactionData({
       }
     }
 
-    const { error: emojiError } = await supabase
-      .from("Emoji")
-      .upsert(
-        {
-          emoji_id: emojiId,
-          emoji_name: emojiName,
-          usage_num: existingEmoji ? existingEmoji.usage_num + 1 : 1,
-          add_user_id: existingEmoji ? existingEmoji.add_user_id : addUserId,
-          updated_at: new Date().toISOString(),
-        },
-        { onConflict: "emoji_id" }
-      );
+    const { error: emojiError } = await supabase.from("Emoji").upsert(
+      {
+        emoji_id: emojiId,
+        emoji_name: emojiName,
+        usage_num: existingEmoji ? existingEmoji.usage_num + 1 : 1,
+        add_user_id: existingEmoji ? existingEmoji.add_user_id : addUserId,
+        updated_at: new Date().toISOString(),
+      },
+      { onConflict: "emoji_id" }
+    );
 
     if (emojiError) {
       console.error("Emojiテーブルの更新エラー:", emojiError);
@@ -186,7 +182,9 @@ export async function saveReactionData({
     // MonthLogテーブルの更新
     const { data: existingMonthLog, error: monthLogFetchError } = await supabase
       .from("MonthLog")
-      .select("month_total_point, reaction_1st_num, add_emoji_num, message_send_num")
+      .select(
+        "month_total_point, reaction_1st_num, add_emoji_num, message_send_num"
+      )
       .eq("result_month", formattedResultMonth)
       .eq("user_id", userId)
       .single();
@@ -208,19 +206,17 @@ export async function saveReactionData({
       messageSendNum += existingMonthLog.message_send_num;
     }
 
-    const { error: monthLogError } = await supabase
-      .from("MonthLog")
-      .upsert(
-        {
-          result_month: formattedResultMonth,
-          user_id: userId,
-          month_total_point: monthTotalPoints,
-          reaction_1st_num: reaction1stNum,
-          add_emoji_num: addEmojiNum,
-          message_send_num: messageSendNum,
-        },
-        { onConflict: "result_month,user_id" }
-      );
+    const { error: monthLogError } = await supabase.from("MonthLog").upsert(
+      {
+        result_month: formattedResultMonth,
+        user_id: userId,
+        month_total_point: monthTotalPoints,
+        reaction_1st_num: reaction1stNum,
+        add_emoji_num: addEmojiNum,
+        message_send_num: messageSendNum,
+      },
+      { onConflict: "result_month,user_id" }
+    );
 
     if (monthLogError) {
       console.error("MonthLogテーブルの更新エラー:", monthLogError);
