@@ -41,5 +41,5 @@ export const useSupabase = () => {
     }
   });
 
-  return { supabase, edgeFunctionUrl: SUPABASE_EDGE_FUNCTION_URL };
+  return { supabase, serviceRoleKey: SUPABASE_SERVICE_ROLE_KEY  ,edgeFunctionUrl: SUPABASE_EDGE_FUNCTION_URL };
 }
