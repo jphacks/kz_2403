@@ -29,5 +29,7 @@ export const useSupabase = () => {
       persistSession: false,
       autoRefreshToken: false,
     }
-  })
+  });
+
+  return { supabase };
 }

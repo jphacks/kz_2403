@@ -26,12 +26,12 @@ export const useSlackbot = () => {
   }
 
   // 環境変数や型ファイルを適用したクライアントを作成
-  const slackbot = new App({
+  const slackBot = new App({
     token: env.SLACK_BOT_TOKEN,
     signingSecret: env.SLACK_SIGNING_SECRET,
   });
 
   const PORT = env.PORT;
 
-  return { slackbot, PORT };
+  return { slackBot, PORT };
 }
