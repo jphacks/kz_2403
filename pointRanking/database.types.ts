@@ -1,4 +1,11 @@
-export type Json =
+[?25l
+    Select a project:                                                                                                
+                                                                                                                     
+  >  1. pmuyoodzkluhaucxcaxm [name: JPHACKS-BusStop2024's Project, org: dseffihkygthvftcdowx, region: ap-southeast-1]
+                                                                                                                     
+                                                                                                                     
+    ↑/k up • ↓/j down • / filter • q quit • ? more                                                                   
+                                                                                                                     [0D[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[2K[1A[0D[2K [0D[2K[?25h[?1002l[?1003l[?1006lexport type Json =
   | string
   | number
   | boolean
@@ -162,6 +169,7 @@ export type Database = {
           updated_at: string
           user_id: string
           user_name: string
+          user_token: string | null
         }
         Insert: {
           created_at?: string
@@ -169,6 +177,7 @@ export type Database = {
           updated_at?: string
           user_id: string
           user_name: string
+          user_token?: string | null
         }
         Update: {
           created_at?: string
@@ -176,6 +185,7 @@ export type Database = {
           updated_at?: string
           user_id?: string
           user_name?: string
+          user_token?: string | null
         }
         Relationships: []
       }
