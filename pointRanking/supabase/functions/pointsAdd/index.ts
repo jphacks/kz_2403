@@ -59,7 +59,7 @@ serve(async (req) => {
 
     // ポイントをユーザーに付与
     const { error: pointError } = await supabase.rpc("increment_total_points", {
-      user_id: reactionUserId,
+      v_user_id: reactionUserId,  // 引数名を変更
       increment: points,
     });
 
