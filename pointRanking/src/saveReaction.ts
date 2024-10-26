@@ -34,6 +34,28 @@ export async function saveReactionData({
   const { slackClient } = useSlackbot();
 
   try {
+    // メッセージに対する既存のリアクションを取得
+    const { data: existingReactions, error: reactionsFetchError } =
+      await supabase
+        .from("Reaction")
+        .select("reaction_id, reaction_user_id")
+        .eq("message_id", messageId);
+
+    if (reactionsFetchError) {
+      console.error("Reactionテーブルの取得エラー:", reactionsFetchError);
+      return;
+    }
+
+    // ユーザーが既にリアクションを付けているか確認
+    const userHasReacted = existingReactions.some(
+      (reaction) => reaction.reaction_user_id === reactionUserId
+    );
+
+    if (userHasReacted) {
+      console.log("ユーザーは既にこのメッセージにリアクションを付けています。");
+      return;
+    }
+
     // Userテーブルの更新
     const { data: existingUser, error: userFetchError } = await supabase
       .from("User")
@@ -126,27 +148,6 @@ export async function saveReactionData({
 
     if (emojiError) {
       console.error("Emojiテーブルの更新エラー:", emojiError);
-      return;
-    }
-
-    // メッセージに対する既存のリアクションを取得
-    const { data: existingReactions, error: reactionsFetchError } = await supabase
-      .from("Reaction")
-      .select("reaction_id, reaction_user_id")
-      .eq("message_id", messageId);
-
-    if (reactionsFetchError) {
-      console.error("Reactionテーブルの取得エラー:", reactionsFetchError);
-      return;
-    }
-
-    // ユーザーが既にリアクションを付けているか確認
-    const userHasReacted = existingReactions.some(
-      (reaction) => reaction.reaction_user_id === reactionUserId
-    );
-
-    if (userHasReacted) {
-      console.log("ユーザーは既にこのメッセージにリアクションを付けています。");
       return;
     }
 
