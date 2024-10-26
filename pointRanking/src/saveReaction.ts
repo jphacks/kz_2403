@@ -56,6 +56,25 @@ export async function saveReactionData({
       return;
     }
 
+    // Reactionテーブルの更新
+    const { error: reactionError } = await supabase
+      .from("Reaction")
+      .upsert(
+        {
+          reaction_id: reactionId,
+          created_at: new Date().toISOString(),
+          message_id: messageId,
+          reaction_user_id: reactionUserId,
+          emoji_id: emojiId,
+        },
+        { onConflict: "reaction_id" }
+      );
+
+    if (reactionError) {
+      console.error("Reactionテーブルの更新エラー:", reactionError);
+      return;
+    }
+
     // Userテーブルの更新
     const { data: existingUser, error: userFetchError } = await supabase
       .from("User")
@@ -148,25 +167,6 @@ export async function saveReactionData({
 
     if (emojiError) {
       console.error("Emojiテーブルの更新エラー:", emojiError);
-      return;
-    }
-
-    // Reactionテーブルの更新
-    const { error: reactionError } = await supabase
-      .from("Reaction")
-      .upsert(
-        {
-          reaction_id: reactionId,
-          created_at: new Date().toISOString(),
-          message_id: messageId,
-          reaction_user_id: reactionUserId,
-          emoji_id: emojiId,
-        },
-        { onConflict: "reaction_id" }
-      );
-
-    if (reactionError) {
-      console.error(reactionError);
       return;
     }
 
