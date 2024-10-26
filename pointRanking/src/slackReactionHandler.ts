@@ -1,9 +1,11 @@
 import { useSlackbot } from "./hooks/useSlackbot"
+import { useSupabase } from "./hooks/useSupabase";
 import { ReactionData, saveReactionData } from "./saveReaction";
 
 // slackのリアクションをsupabaseに保存する
 (async () => {
   const { slackBot, PORT } = useSlackbot();
+  const { edgeFunctionUrl, serviceRoleKey } = useSupabase();
   
   //  lackリアクションが追加された時の処理
   slackBot.event('reaction_added', async ({ event, client }) => {
@@ -59,11 +61,27 @@ import { ReactionData, saveReactionData } from "./saveReaction";
       console.error("リアクションデータの保存に失敗しました", error);
     }
 
-    try {
-      // edgeFunctionsの呼び出し
-    } catch (error) {
-      console.error(error);
-    }
+      // Edge Functionの呼び出し
+      try {
+        const response = await fetch(edgeFunctionUrl, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${serviceRoleKey}`,
+          },
+          body: JSON.stringify({ messageId, reactionUserId }),
+        });
+
+        if (!response.ok) {
+          const errorData = await response.json();
+          console.error("Edge Functionエラー:", errorData);
+        } else {
+          const data = await response.json();
+          console.log("Edge Function呼び出し成功:", data);
+        }
+      } catch (error) {
+        console.error("Edge Functionの呼び出しエラー:", error);
+      }
   });
 
   // アプリの起動
