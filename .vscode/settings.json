@@ -1,3 +1,6 @@
 {
-  "deno.enable": false
+  "deno.enable": false,
+  "python.analysis.extraPaths": [
+    "./emoji-recommend-logbase/src"
+  ]
 }
