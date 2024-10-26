@@ -47,7 +47,10 @@ app.post('/recommend', async (c) => {
       return c.json({ error: 'Bad Request: text is not defined' }, 400);
     }
 
-    const body = JSON.stringify({ input: text });
+    // 文章内のLinkを除去
+    const ReplacedText = text.replace(/https?:\/\/\S+/g, '');
+
+    const body = JSON.stringify({ input: ReplacedText });
     const response = await fetch(`https://gateway.ai.cloudflare.com/v1/${c.env.CF_ACCOUNT_ID}/${c.env.CF_AI_GATEWAY_ID}/huggingface/intfloat/multilingual-e5-large`, {
       headers: {
 				Authorization: `Bearer ${c.env.HF_API_TOKEN}`,
