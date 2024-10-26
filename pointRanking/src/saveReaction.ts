@@ -56,6 +56,37 @@ export async function saveReactionData({
       return false;
     }
 
+    // Messageテーブルにメッセージが存在するか確認し、存在しない場合は追加
+    const { data: existingMessage, error: messageFetchError } = await supabase
+      .from("Message")
+      .select("message_id")
+      .eq("message_id", messageId)
+      .single();
+
+    if (messageFetchError && messageFetchError.code !== "PGRST116") {
+      console.error("Messageテーブルの取得エラー:", messageFetchError);
+      return false;
+    }
+
+    if (!existingMessage) {
+      const { error: messageInsertError } = await supabase
+        .from("Message")
+        .insert([
+          {
+            message_id: messageId,
+            created_at: new Date().toISOString(),
+            message_text: messageText,
+            message_user_id: messageUserId,
+            channnel_id: channelId,
+          },
+        ]);
+
+      if (messageInsertError) {
+        console.error("Messageテーブルの挿入エラー:", messageInsertError);
+        return false;
+      }
+    }
+
     // Reactionテーブルの更新
     const { error: reactionError } = await supabase
       .from("Reaction")
@@ -103,25 +134,6 @@ export async function saveReactionData({
 
     if (userError) {
       console.error("Userテーブルの更新エラー:", userError);
-      return false;
-    }
-
-    // Messageテーブルの更新
-    const { error: messageError } = await supabase
-      .from("Message")
-      .upsert(
-        {
-          message_id: messageId,
-          created_at: new Date().toISOString(),
-          message_text: messageText,
-          message_user_id: messageUserId,
-          channnel_id: channelId,
-        },
-        { onConflict: "message_id" }
-      );
-
-    if (messageError) {
-      console.error("Messageテーブルの更新エラー:", messageError);
       return false;
     }
 
