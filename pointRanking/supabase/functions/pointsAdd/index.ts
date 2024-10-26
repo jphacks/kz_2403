@@ -18,7 +18,7 @@ serve(async (req) => {
       return new Response("OK", {
         headers: {
           "Access-Control-Allow-Origin": "*",
-          "Access-Control-Allow-Methods": "POST",
+          "Access-Control-Allow-Methods": "POST, OPTIONS",
         },
       });
     }
