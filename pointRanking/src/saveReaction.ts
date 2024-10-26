@@ -29,7 +29,7 @@ export async function saveReactionData({
   emojiName,
   resultMonth,
   points,
-}: ReactionData) {
+}: ReactionData): Promise<boolean> {
   const { supabase } = useSupabase();
   const { slackClient } = useSlackbot();
 
@@ -43,7 +43,7 @@ export async function saveReactionData({
 
     if (reactionsFetchError) {
       console.error("Reactionテーブルの取得エラー:", reactionsFetchError);
-      return;
+      return false;
     }
 
     // ユーザーが既にリアクションを付けているか確認
@@ -53,7 +53,7 @@ export async function saveReactionData({
 
     if (userHasReacted) {
       console.log("ユーザーは既にこのメッセージにリアクションを付けています。");
-      return;
+      return false;
     }
 
     // Reactionテーブルの更新
@@ -72,7 +72,7 @@ export async function saveReactionData({
 
     if (reactionError) {
       console.error("Reactionテーブルの更新エラー:", reactionError);
-      return;
+      return false;
     }
 
     // Userテーブルの更新
@@ -84,7 +84,7 @@ export async function saveReactionData({
 
     if (userFetchError && userFetchError.code !== "PGRST116") {
       console.error("Userテーブルの取得エラー:", userFetchError);
-      return;
+      return false;
     }
 
     let totalPoints = points;
@@ -103,7 +103,7 @@ export async function saveReactionData({
 
     if (userError) {
       console.error("Userテーブルの更新エラー:", userError);
-      return;
+      return false;
     }
 
     // Messageテーブルの更新
@@ -122,7 +122,7 @@ export async function saveReactionData({
 
     if (messageError) {
       console.error("Messageテーブルの更新エラー:", messageError);
-      return;
+      return false;
     }
 
     // Emojiテーブルの更新（存在しない場合は新規作成）
@@ -134,7 +134,7 @@ export async function saveReactionData({
 
     if (emojiFetchError && emojiFetchError.code !== "PGRST116") {
       console.error("Emojiテーブルの取得エラー:", emojiFetchError);
-      return;
+      return false;
     }
 
     let addUserId = reactionUserId; // デフォルトはリアクションしたユーザー
@@ -167,7 +167,7 @@ export async function saveReactionData({
 
     if (emojiError) {
       console.error("Emojiテーブルの更新エラー:", emojiError);
-      return;
+      return false;
     }
 
     const formattedResultMonth = `${resultMonth}-01`;
@@ -181,7 +181,7 @@ export async function saveReactionData({
 
     if (monthLogFetchError && monthLogFetchError.code !== "PGRST116") {
       console.error("MonthLogテーブルの取得エラー:", monthLogFetchError);
-      return;
+      return false;
     }
 
     let monthTotalPoints = points;
@@ -212,11 +212,13 @@ export async function saveReactionData({
 
     if (monthLogError) {
       console.error("MonthLogテーブルの更新エラー:", monthLogError);
-      return;
+      return false;
     }
 
     console.log("リアクションデータの保存完了");
+    return true;
   } catch (error) {
     console.error("エラー:", error);
+    return false;
   }
 }

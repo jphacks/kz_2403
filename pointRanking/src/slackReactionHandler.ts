@@ -7,7 +7,7 @@ import { ReactionData, saveReactionData } from "./saveReaction";
   const { slackBot, PORT } = useSlackbot();
   const { edgeFunctionUrl, serviceRoleKey } = useSupabase();
   
-  //  lackリアクションが追加された時の処理
+  // Slackリアクションが追加された時の処理
   slackBot.event('reaction_added', async ({ event, client }) => {
     const { reaction, user, item, event_ts } = event;
     // DBに合わせて各種プロパティを変換
@@ -42,7 +42,7 @@ import { ReactionData, saveReactionData } from "./saveReaction";
     try{
       const userInfo = await client.users.info({ user: reactionUserId });
       if (userInfo.user && userInfo.user.profile) {
-        userName = userInfo.user.profile.real_name || userInfo.user.profile.display_name || "unknown_user";
+        userName = userInfo.user.profile.real_name || userInfo.user.profile.display_name || "unknown";
       }
     } catch (error) {
       console.error("ユーザー情報取得", error);
@@ -66,40 +66,38 @@ import { ReactionData, saveReactionData } from "./saveReaction";
 
     // リアクションデータの保存
     try {
-      await saveReactionData(payload);
-      console.log("リアクションデータを保存しました");
+      const isReactionSaved = await saveReactionData(payload);
+
+      if (isReactionSaved) {
+        console.log("リアクションデータを保存しました");
+
+        // Edge Functionの呼び出し
+        try {
+          const response = await fetch(edgeFunctionUrl, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              "Authorization": `Bearer ${serviceRoleKey}`,
+            },
+            body: JSON.stringify({ messageId, reactionUserId }),
+          });
+
+          if (!response.ok) {
+            const errorData = await response.json();
+            console.error("Edge Functionエラー:", errorData);
+          } else {
+            const data = await response.json();
+            console.log("Edge Function呼び出し成功:", data);
+          }
+        } catch (error) {
+          console.error("Edge Functionの呼び出しエラー:", error);
+        }
+      } else {
+        console.log("リアクションデータの保存に失敗しました");
+      }
     } catch (error) {
       console.error("リアクションデータの保存に失敗しました", error);
     }
-
-    console.log("Edge Function URL:", edgeFunctionUrl);
-
-    if (!edgeFunctionUrl || !edgeFunctionUrl.startsWith("https://")) {
-      console.error("無効なEdge Function URLです:", edgeFunctionUrl);
-      return;
-    }
-
-      // Edge Functionの呼び出し
-      try {
-        const response = await fetch(edgeFunctionUrl, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            "Authorization": `Bearer ${serviceRoleKey}`,
-          },
-          body: JSON.stringify({ messageId, reactionUserId }),
-        });
-
-        if (!response.ok) {
-          const errorData = await response.json();
-          console.error("Edge Functionエラー:", errorData);
-        } else {
-          const data = await response.json();
-          console.log("Edge Function呼び出し成功:", data);
-        }
-      } catch (error) {
-        console.error("Edge Functionの呼び出しエラー:", error);
-      }
   });
 
   // アプリの起動
