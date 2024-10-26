@@ -11,6 +11,7 @@ Cloudflare AI Gateway を通して、Hugging Face Inference API の[intfloat/mul
 ## Development
 
 ``` bash
+cd emoji-recommend-workers
 bun i
 bun run dev --remote
 ```
