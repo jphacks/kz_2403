@@ -61,6 +61,13 @@ import { ReactionData, saveReactionData } from "./saveReaction";
       console.error("リアクションデータの保存に失敗しました", error);
     }
 
+    console.log("Edge Function URL:", edgeFunctionUrl);
+
+    if (!edgeFunctionUrl || !edgeFunctionUrl.startsWith("https://")) {
+      console.error("無効なEdge Function URLです:", edgeFunctionUrl);
+      return;
+    }
+
       // Edge Functionの呼び出し
       try {
         const response = await fetch(edgeFunctionUrl, {
