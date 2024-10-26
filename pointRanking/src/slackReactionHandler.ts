@@ -69,4 +69,4 @@ import { ReactionData, saveReactionData } from "./saveReaction";
   // アプリの起動
   await slackBot.start(PORT || 3000);
   console.log(`${PORT}を立ち上げました`);
-})
+})();
