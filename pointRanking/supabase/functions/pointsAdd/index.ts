@@ -43,8 +43,9 @@ serve(async (req) => {
       });
     }
 
-    let points = 1;
+    let points = 0;
 
+    // リアクションの順番に基づいてポイントを設定
     if (reactions.length > 0) {
       const reactionIndex = reactions.findIndex(
         (reaction) => reaction.reaction_user_id === reactionUserId
@@ -57,15 +58,33 @@ serve(async (req) => {
       }
     }
 
-    // ポイントをユーザーに付与
-    const { error: pointError } = await supabase.rpc("increment_total_points", {
-      v_user_id: reactionUserId,  // 引数名を変更
-      increment: points,
-    });
+    // 現在のtotal_pointを取得して加算
+    const { data: user, error: userError } = await supabase
+      .from("User")
+      .select("total_point")
+      .eq("user_id", reactionUserId)
+      .single();
 
-    if (pointError) {
-      console.error("ポイント付与エラー:", pointError);
-      return new Response(JSON.stringify({ error: pointError.message }), {
+    if (userError) {
+      console.error("Userテーブルの取得エラー:", userError);
+      return new Response(JSON.stringify({ error: userError.message }), {
+        status: 500,
+        headers: { "Access-Control-Allow-Origin": "*" },
+      });
+    }
+
+    // 新しいポイントの計算
+    const newTotalPoints = (user?.total_point || 0) + points;
+
+    // 更新処理
+    const { error: updateError } = await supabase
+      .from("User")
+      .update({ total_point: newTotalPoints })
+      .eq("user_id", reactionUserId);
+
+    if (updateError) {
+      console.error("ポイント更新エラー:", updateError);
+      return new Response(JSON.stringify({ error: updateError.message }), {
         status: 500,
         headers: { "Access-Control-Allow-Origin": "*" },
       });
