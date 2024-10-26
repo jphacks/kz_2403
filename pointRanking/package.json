@@ -14,6 +14,7 @@
   },
   "dependencies": {
     "@slack/bolt": "^4.0.1",
+    "dotenv": "^16.4.5",
     "ts-dotenv": "^0.9.1"
   }
 }
