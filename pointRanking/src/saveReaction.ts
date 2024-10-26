@@ -1,3 +1,4 @@
+import { useSlackbot } from "./hooks/useSlackbot";
 import { useSupabase } from "./hooks/useSupabase";
 
 export type ReactionData = {
@@ -30,6 +31,7 @@ export async function saveReactionData({
   points,
 }: ReactionData) {
   const { supabase } = useSupabase();
+  const { slackClient } = useSlackbot(); 
 
   try {
     // Userテーブルの更新
@@ -94,6 +96,21 @@ export async function saveReactionData({
       return;
     }
 
+    let addUserid = reactionUserId; // デフォルトはリアクションしたユーザー
+
+    if (!existingEmoji) {
+      try {
+        // Slack APIを使用して絵文字のリストを取得
+        const emojiList = await slackClient.emoji.list();
+        if (emojiList.ok && emojiList.emoji && emojiList.emoji[emojiName]) {
+          // 絵文字の作成者情報を取得
+          addUserid = reactionUserId;
+        }
+      } catch (error) {
+        console.error("絵文字リストの取得エラー:", error);
+      }
+    }
+
     const { error: emojiError } = await supabase
       .from("Emoji")
       .upsert(
@@ -101,7 +118,7 @@ export async function saveReactionData({
           emoji_id: emojiId,
           emoji_name: emojiName,
           usage_num:existingEmoji ? existingEmoji.usage_num + 1 : 1,
-          add_user_id: existingEmoji ? existingEmoji.add_user_id : reactionUserId,
+          add_user_id: existingEmoji ? existingEmoji.add_user_id : addUserid,
           updated_at: new Date().toISOString(),
         },
         { onConflict: "emoji_id" }
