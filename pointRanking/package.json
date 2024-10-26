@@ -16,6 +16,7 @@
     "@slack/bolt": "^4.0.1",
     "@supabase/supabase-js": "^2.45.6",
     "@types/cors": "^2.8.17",
+    "axios": "^1.7.7",
     "cors": "^2.8.5",
     "dotenv": "^16.4.5",
     "ts-dotenv": "^0.9.1"
