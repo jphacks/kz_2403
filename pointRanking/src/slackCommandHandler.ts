@@ -1,18 +1,12 @@
 import { App } from '@slack/bolt';
 import { useSupabase } from "./hooks/useSupabase";
-import dotenv from 'dotenv';
-
-dotenv.config();
+import { useSlackbot } from './hooks/useSlackbot';
 
 const { supabase } = useSupabase();
-
-const slackBot = new App({
-  token: process.env.SLACK_BOT_TOKEN,
-  signingSecret: process.env.SLACK_SIGNING_SECRET,
-});
+const { slackBot, PORT } = useSlackbot();
 
 // 月間ランキングのスラッシュコマンド
-slackBot.command("/monthRanking", async ({ command, ack, client }) => {
+slackBot.command("/monthranking", async ({ command, ack, client }) => {
   try {
     // コマンドの受信
     await ack();
@@ -90,7 +84,7 @@ slackBot.command("/monthRanking", async ({ command, ack, client }) => {
 });
 
 // 総合ランキングのスラッシュコマンド
-slackBot.command("/totalRanking", async ({ command, ack, client }) => {
+slackBot.command("/totalranking", async ({ command, ack, client }) => {
   try {
     // コマンドの受信
     await ack();
@@ -134,7 +128,7 @@ slackBot.command("/totalRanking", async ({ command, ack, client }) => {
 });
 
 // 自分の順位を表示するスラッシュコマンド
-slackBot.command("/myRanking", async ({ command, ack, client }) => {
+slackBot.command("/myranking", async ({ command, ack, client }) => {
   try {
     // コマンドの受信
     await ack();
@@ -182,7 +176,6 @@ slackBot.command("/myRanking", async ({ command, ack, client }) => {
 
 // アプリの起動
 (async () => {
-  const PORT = process.env.PORT || 3000;
-  await slackBot.start(PORT);
+  await slackBot.start(PORT || 3000);
   console.log(`${PORT}を立ち上げました`);
 })();
