@@ -1,6 +1,6 @@
 import { useSupabase } from "./hooks/useSupabase";
 
-type ReactionData = {
+export type ReactionData = {
   userId: string;
   userName: string;
   messageId: string;
