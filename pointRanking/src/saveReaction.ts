@@ -33,11 +33,27 @@ export async function saveReactionData({
 
   try {
     // Userテーブルの更新
-    const { data: user, error: userError } = await supabase.from("User").upsert(
+    const { data: existingUser, error: userFetchError } = await supabase
+      .from("User")
+      .select("total_point")
+      .eq("user_id", userId)
+      .single();
+
+    if (userFetchError && userFetchError.code !== "PGRST116") {
+      console.error("Userテーブルの取得エラー:", userFetchError);
+      return;
+    }
+
+    let totalPoints = points;
+    if (existingUser) {
+      totalPoints += existingUser.total_point;
+    }
+
+    const { error: userError } = await supabase.from("User").upsert(
       {
         user_id: userId,
         user_name: userName,
-        total_point: points,
+        total_point: totalPoints,
       },
       { onConflict: "user_id" }
     );
@@ -47,8 +63,8 @@ export async function saveReactionData({
       return;
     }
 
-    // messageテーブルの更新
-    const { data: message, error: messageError } = await supabase
+    // Messageテーブルの更新
+    const { error: messageError } = await supabase
       .from("Message")
       .upsert(
         {
@@ -67,7 +83,7 @@ export async function saveReactionData({
     }
 
     // Emojiテーブルの更新（存在しない場合は新規作成）
-    const { data: emoji, error: emojiError } = await supabase
+    const { error: emojiError } = await supabase
       .from("Emoji")
       .upsert(
         {
@@ -86,7 +102,7 @@ export async function saveReactionData({
     }
 
     // Reactionテーブルの更新
-    const { data: reaction, error: reactionError } = await supabase
+    const { error: reactionError } = await supabase
       .from("Reaction")
       .upsert(
         {
@@ -106,18 +122,42 @@ export async function saveReactionData({
 
     const formattedResultMonth = `${resultMonth}-01`;
     // MonthLogテーブルの更新
-    const { data: monthLog, error: monthLogError } = await supabase
+    const { data: existingMonthLog, error: monthLogFetchError } = await supabase
+      .from("MonthLog")
+      .select("month_total_point, reaction_1st_num, add_emoji_num, message_send_num")
+      .eq("result_month", formattedResultMonth)
+      .eq("user_id", userId)
+      .single();
+
+    if (monthLogFetchError && monthLogFetchError.code !== "PGRST116") {
+      console.error("MonthLogテーブルの取得エラー:", monthLogFetchError);
+      return;
+    }
+
+    let monthTotalPoints = points;
+    let reaction1stNum = 1;
+    let addEmojiNum = 1;
+    let messageSendNum = 1;
+
+    if (existingMonthLog) {
+      monthTotalPoints += existingMonthLog.month_total_point;
+      reaction1stNum += existingMonthLog.reaction_1st_num;
+      addEmojiNum += existingMonthLog.add_emoji_num;
+      messageSendNum += existingMonthLog.message_send_num;
+    }
+
+    const { error: monthLogError } = await supabase
       .from("MonthLog")
       .upsert(
         {
           result_month: formattedResultMonth,
           user_id: userId,
-          month_total_point: points,
-          reaction_1st_num: 1,
-          add_emoji_num: 1,
-          message_send_num: 1,
+          month_total_point: monthTotalPoints,
+          reaction_1st_num: reaction1stNum,
+          add_emoji_num: addEmojiNum,
+          message_send_num: messageSendNum,
         },
-        { onConflict: "result_month,user_id" } // 文字列形式に修正
+        { onConflict: "result_month,user_id" }
       );
 
     if (monthLogError) {
