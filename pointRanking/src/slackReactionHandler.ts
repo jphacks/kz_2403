@@ -20,6 +20,7 @@ import { ReactionData, saveReactionData } from "./saveReaction";
 
     // リアクションを受けたメッセージの送信者のIDを取得
     let messageUserId = "unknown_user"; //初期値
+    let userName = "unknown_user"; //初期値
 
     try {
       // メッセージ情報を取得して、送信者のIDを取得
@@ -37,10 +38,20 @@ import { ReactionData, saveReactionData } from "./saveReaction";
       console.error("メッセージ取得", error);
     }
 
+    // ユーザー情報を取得し、ユーザー名を取得
+    try{
+      const userInfo = await client.users.info({ user: reactionUserId });
+      if (userInfo.user && userInfo.user.profile) {
+        userName = userInfo.user.profile.real_name || userInfo.user.profile.display_name || "unknown_user";
+      }
+    } catch (error) {
+      console.error("ユーザー情報取得", error);
+    }
+
     // Supabaseに保存するペイロード
     const payload: ReactionData = {
       userId: reactionUserId,
-      userName: "unknown",
+      userName,
       messageId,
       messageText: "unknown",
       messageUserId,
