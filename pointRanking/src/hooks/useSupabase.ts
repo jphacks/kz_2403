@@ -18,7 +18,7 @@ const env = load({
     type: String,
     default: process.env.SUPABASE_SERVICE_ROLE_KEY || '',
   },
-  SUPABASE_EDGE_FUNCTION_URL: {
+  EDGE_FUNCTION_URL: {
     type: String,
     default: process.env.SUPABASE_EDGE_FUNCTION_URL || '',
   }
@@ -28,7 +28,7 @@ export const useSupabase = () => {
   const SUPABASE_URL = env.SUPABASE_URL || '';
   const SUPABASE_ANON_KEY = env.SUPABASE_ANON_KEY || '';
   const SUPABASE_SERVICE_ROLE_KEY = env.SUPABASE_SERVICE_ROLE_KEY || '';
-  const SUPABASE_EDGE_FUNCTION_URL = env.SUPABASE_EDGE_FUNCTION_URL || '';
+  const EDGE_FUNCTION_URL = env.EDGE_FUNCTION_URL || '';
   
   if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
     throw new Error('SUPABASE_URLかSUPABASE_ANON_KEYの環境変数に問題あり!!')
@@ -41,5 +41,5 @@ export const useSupabase = () => {
     }
   });
 
-  return { supabase, serviceRoleKey: SUPABASE_SERVICE_ROLE_KEY  ,edgeFunctionUrl: SUPABASE_EDGE_FUNCTION_URL };
+  return { supabase, serviceRoleKey: SUPABASE_SERVICE_ROLE_KEY  ,edgeFunctionUrl: EDGE_FUNCTION_URL };
 }
