@@ -1,6 +1,6 @@
 import { App } from "@slack/bolt";
 import { load } from "ts-dotenv";
-
+import { WebClient } from "@slack/web-api";
 
 const path = require('path');
 require('dotenv').config({ path: path.resolve(__dirname, '../../.env') });
@@ -31,7 +31,9 @@ export const useSlackbot = () => {
     signingSecret: env.SLACK_SIGNING_SECRET,
   });
 
+  const slackClient = new WebClient(env.SLACK_BOT_TOKEN);
+
   const PORT = env.PORT;
 
-  return { slackBot, PORT };
+  return { slackBot, slackClient, PORT };
 }
