@@ -162,8 +162,19 @@ export async function saveReactionData({
       return;
     }
 
+    // メッセージに対する既存のリアクションを取得
+    const {data: existingReactions, error: reactionsFetchError} = await supabase
+      .from("Reaction")
+      .select("reaction_id")
+      .eq("message_id", messageId);
+    
+      if (reactionsFetchError) {
+        console.error("Reactionテーブルの取得エラー:", reactionsFetchError);
+        return;
+      }
+
     let monthTotalPoints = points;
-    let reaction1stNum = 1;
+    let reaction1stNum = existingReactions.length === 0 ? 1 : 0;
     let addEmojiNum = 1;
     let messageSendNum = 1;
 
