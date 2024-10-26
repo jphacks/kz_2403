@@ -2,7 +2,8 @@ import os
 from dotenv import load_dotenv
 from slack_bolt import App
 from slack_bolt.adapter.flask import SlackRequestHandler
-from flask import Flask, request
+from flask import Flask, request, redirect
+from slack_sdk import WebClient
 
 # 環境変数の読み込み
 load_dotenv()
@@ -17,13 +18,12 @@ app = App(
 flask_app = Flask(__name__)
 handler = SlackRequestHandler(app)
 
-# タイムスタンプを保存する変数
-previous_ts = None
-recommended_ts = None
+# ユーザートークンを保存する辞書（実際はデータベースで管理推奨）
+user_tokens = {}
 
-# Block KitのJSON（例）
+# Botが送信するメッセージのBlock Kit JSON
 block_kit_message = {
-    "text": "リアクションを選んでください",  # 通知やスクリーンリーダー用のtextフィールド
+    "text": "リアクションを選んでください",
     "blocks": [
         {
             "type": "section",
@@ -44,7 +44,7 @@ block_kit_message = {
                         "text": ":eye_hakushin:",
                         "emoji": True
                     },
-                    "value": "eye_hakushin",  # 実際の絵文字の名前を指定
+                    "value": "eye_hakushin",
                     "action_id": "reaction1"
                 },
                 {
@@ -68,85 +68,55 @@ block_kit_message = {
                     "action_id": "reaction3"
                 }
             ]
-        },
-        {
-            "type": "actions",
-            "elements": [
-                {
-                    "type": "button",
-                    "text": {
-                        "type": "plain_text",
-                        "text": "おすすめを非表示",
-                        "emoji": True
-                    },
-                    "action_id": "hide_reactions",
-                    "value": "hide"
-                }
-            ]
         }
     ]
 }
 
-# Botが送信する前のメッセージにリアクションを追加する
+# ユーザーのメッセージにボタンを追加するイベントリスナー
 @app.event("message")
-def handle_message_events(body, say):
-    global previous_ts, recommended_ts
+def handle_message_events(body, client):
+    # ユーザーから送信されたメッセージにボタンを含むメッセージを送信
+    channel_id = body["event"]["channel"]
+    message_ts = body["event"]["ts"]
 
-    # 最新メッセージのタイムスタンプを保存し、Block Kitメッセージを送信
-    previous_ts = body["event"]["ts"]
-    result = say(block_kit_message)
-    recommended_ts = result["ts"]
+    # ボタンのみのメッセージを送信（テキストを省略）
+    client.chat_postMessage(
+        channel=channel_id,
+        blocks=[
+            {
+                "type": "actions",
+                "elements": [
+                    {
+                        "type": "button",
+                        "text": {
+                            "type": "plain_text",
+                            "text": "リアクションを追加",
+                            "emoji": True
+                        },
+                        "action_id": "open_reactions",
+                        "value": message_ts  # メッセージのタイムスタンプをボタンに埋め込む
+                    }
+                ]
+            }
+        ]
+    )
 
-# ボタンが押されたときにリアクションを追加するアクションリスナー
-@app.action("reaction1")
-@app.action("reaction2")
-@app.action("reaction3")
-def handle_reaction_buttons(ack, body, client):
-    global previous_ts
+# 「リアクションを追加」ボタンが押されたときにBlock Kitメッセージを表示
+@app.action("open_reactions")
+def handle_open_reactions(ack, body, client):
+    ack()
 
-    ack()  # ボタンのアクションを即座に確認
-
-    # ボタンのvalueに応じたリアクション名を取得
-    reaction_name = body["actions"][0]["value"]
-
-    # ボットメッセージの前のメッセージのチャンネルIDとタイムスタンプを取得
-    channel_id = body["channel"]["id"]
-    
-    # ボタンを押したユーザーのIDを取得
-    user_id = body["user"]["id"]
-
-    # ユーザーとしてリアクションを追加（Slack APIではボットでなく、ユーザー認証トークンが必要）
-    if previous_ts:
-        try:
-            # APIの呼び出しでリアクションを追加
-            client.api_call(
-                api_method="reactions.add",
-                json={
-                    "channel": channel_id,
-                    "timestamp": previous_ts,
-                    "name": reaction_name,
-                    "user": user_id
-                }
-            )
-        except Exception as e:
-            print(f"リアクション追加中のエラー: {e}")
-
-# 「おすすめを非表示」ボタンを押したときにおすすめメッセージを削除
-@app.action("hide_reactions")
-def hide_reactions(ack, body, client):
-    global recommended_ts
-
-    ack()  # ボタンのアクションを即座に確認
-
-    # チャンネルIDとおすすめメッセージのタイムスタンプを取得
+    # ボタンに埋め込んでいたタイムスタンプを取得
+    message_ts = body["actions"][0]["value"]
     channel_id = body["channel"]["id"]
 
-    # Slack APIを使っておすすめメッセージを削除
-    if recommended_ts:
-        client.chat_delete(
-            channel=channel_id,
-            ts=recommended_ts
-        )
+    # Botのリアクションメッセージを表示
+    client.chat_postMessage(
+        channel=channel_id,
+        thread_ts=message_ts,  # ユーザーのメッセージのスレッドに表示
+        blocks=block_kit_message["blocks"],
+        text=block_kit_message["text"]
+    )
 
 # Slackのリクエストを処理するエンドポイント
 @flask_app.route("/slack/events", methods=["POST"])
