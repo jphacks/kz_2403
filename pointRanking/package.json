@@ -13,6 +13,7 @@
     "typescript": "^5.4.2"
   },
   "dependencies": {
-    "@slack/bolt": "^4.0.1"
+    "@slack/bolt": "^4.0.1",
+    "ts-dotenv": "^0.9.1"
   }
 }
