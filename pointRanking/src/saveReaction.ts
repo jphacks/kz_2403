@@ -83,14 +83,25 @@ export async function saveReactionData({
     }
 
     // Emojiテーブルの更新（存在しない場合は新規作成）
+    const { data: existingEmoji, error: emojiFetchError} = await supabase
+      .from("Emoji")
+      .select("emoji_id, usage_num, add_user_id")
+      .eq("emoji_id", emojiId)
+      .single();
+
+    if (emojiFetchError && emojiFetchError.code !== "PGRST116") {
+      console.error("Emojiテーブルの取得エラー:", emojiFetchError);
+      return;
+    }
+
     const { error: emojiError } = await supabase
       .from("Emoji")
       .upsert(
         {
           emoji_id: emojiId,
           emoji_name: emojiName,
-          usage_num: 1, // 新規追加の場合は使用回数1とする
-          add_user_id: reactionUserId,
+          usage_num:existingEmoji ? existingEmoji.usage_num + 1 : 1,
+          add_user_id: existingEmoji ? existingEmoji.add_user_id : reactionUserId,
           updated_at: new Date().toISOString(),
         },
         { onConflict: "emoji_id" }
