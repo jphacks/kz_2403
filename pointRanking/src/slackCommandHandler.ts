@@ -6,7 +6,15 @@ import axios from 'axios';
 const { slackBot, PORT } = useSlackbot();
 const { supabase } = useSupabase();
 
-// ackの応答速度を最大化するために、非同期処理の後に行う
+// ackのテスト
+slackBot.command("/test", async ({ ack }) => {
+  try {
+    await ack();
+  } catch (error) {
+    console.error("ackのエラー:", error);
+  }
+});
+
 // 月間ランキングのスラッシュコマンド
 slackBot.command("/monthranking", async ({ command, ack }) => {
   try {
@@ -15,12 +23,11 @@ slackBot.command("/monthranking", async ({ command, ack }) => {
   } catch (error) {
     console.error("ackのエラー:", error);
   }
-  handleMonthRanking(command).catch(console.error);  // 非同期処理をバックグラウンドで行う
 });
 
 async function handleMonthRanking(command: SlackCommandMiddlewareArgs["command"]) {
   try {
-    const currentMonth = new Date().toISOString().slice(0, 7); // YYYY-MM形式
+    const currentMonth = new Date().toISOString().slice(0, 7) + "-01"; // YYYY-MM形式
 
     // SupabaseのMonthLogテーブルからポイントランキングを取得
     const rankingPromise = supabase
@@ -36,7 +43,7 @@ async function handleMonthRanking(command: SlackCommandMiddlewareArgs["command"]
       console.error("MonthLogテーブルの取得エラー:", rankingError);
       await axios.post(command.response_url, {
         text: "データの取得に失敗しました",
-        response_type: "ephemeral",
+        response_type: "in_channel",  // 全体に見えるように設定
       });
       return;
     }
@@ -54,7 +61,7 @@ async function handleMonthRanking(command: SlackCommandMiddlewareArgs["command"]
       console.error("Userテーブルの取得エラー:", usersError);
       await axios.post(command.response_url, {
         text: "データの取得に失敗しました",
-        response_type: "ephemeral",
+        response_type: "in_channel",  // 全体に見えるように設定
       });
       return;
     }
@@ -82,13 +89,125 @@ async function handleMonthRanking(command: SlackCommandMiddlewareArgs["command"]
     // ランキングをSlackに投稿
     await axios.post(command.response_url, {
       text: `今月のポイントランキング\n${rankingText}`,
-      response_type: "in_channel",
+      response_type: "in_channel",  // 全体に見えるように設定
     });
   } catch (error) {
     console.error("ポイントランキング取得エラー:", error);
     await axios.post(command.response_url, {
       text: "データの取得に失敗しました",
-      response_type: "ephemeral",
+      response_type: "in_channel",  // 全体に見えるように設定
+    });
+  }
+}
+
+// 累計ポイントのスラッシュコマンド
+slackBot.command("/totalpoints", async ({ command, ack }) => {
+  try {
+    await ack();  // 即座にACKを返すことで応答速度を最大化
+    handleTotalPoints(command).catch(console.error); 
+  } catch (error) {
+    console.error("ackのエラー:", error);
+  }
+});
+
+async function handleTotalPoints(command: SlackCommandMiddlewareArgs["command"]) {
+  try {
+    // SupabaseのUserテーブルから累計ポイントを取得
+    const pointsPromise = supabase
+      .from("User")
+      .select("user_id, user_name, total_point")
+      .order("total_point", { ascending: false })
+      .limit(10);
+
+    const { data: pointsData, error: pointsError } = await pointsPromise;
+
+    if (pointsError) {
+      console.error("Userテーブルの取得エラー:", pointsError);
+      await axios.post(command.response_url, {
+        text: "データの取得に失敗しました",
+        response_type: "in_channel",  // 全体に見えるように設定
+      });
+      return;
+    }
+
+    // ポイントデータを整形
+    const pointsText = pointsData
+      .map((entry, index) => {
+        return `${index + 1}位: ${entry.user_name} : ${entry.total_point}pt`;
+      })
+      .join("\n");
+
+    // 累計ポイントをSlackに投稿
+    await axios.post(command.response_url, {
+      text: `累計ポイントランキング\n${pointsText}`,
+      response_type: "in_channel",  // 全体に見えるように設定
+    });
+  } catch (error) {
+    console.error("累計ポイント取得エラー:", error);
+    await axios.post(command.response_url, {
+      text: "データの取得に失敗しました",
+      response_type: "in_channel",  // 全体に見えるように設定
+    });
+  }
+}
+
+// ユーザー個人のポイントを確認するスラッシュコマンド
+slackBot.command("/mypoints", async ({ command, ack }) => {
+  try {
+    await ack();  // 即座にACKを返すことで応答速度を最大化
+    handleMyPoints(command).catch(console.error); 
+  } catch (error) {
+    console.error("ackのエラー:", error);
+  }
+});
+
+async function handleMyPoints(command: SlackCommandMiddlewareArgs["command"]) {
+  try {
+    const userId = command.user_id;
+
+    // SupabaseのUserテーブルから全ユーザーのポイントを取得
+    const { data: allUsersData, error: allUsersError } = await supabase
+      .from("User")
+      .select("user_id, user_name, total_point")
+      .order("total_point", { ascending: false });
+
+    if (allUsersError) {
+      console.error("Userテーブルの取得エラー:", allUsersError);
+      await axios.post(command.response_url, {
+        text: "データの取得に失敗しました",
+        response_type: "ephemeral",  // 自分だけ見えるように設定
+      });
+      return;
+    }
+
+    // ユーザーのポイントデータを取得
+    const userData = allUsersData.find(user => user.user_id === userId);
+
+    if (!userData) {
+      console.error("ユーザーが見つかりません");
+      await axios.post(command.response_url, {
+        text: "ユーザーが見つかりません",
+        response_type: "ephemeral",  // 自分だけ見えるように設定
+      });
+      return;
+    }
+
+    // ユーザーの順位を計算
+    const userRank = allUsersData.findIndex(user => user.user_id === userId) + 1;
+
+    // ユーザーのポイントデータを整形
+    const pointsText = `あなたのポイント\n${userData.user_name} : ${userData.total_point}pt\n順位: ${userRank}位`;
+
+    // ユーザーのポイントをSlackに投稿
+    await axios.post(command.response_url, {
+      text: pointsText,
+      response_type: "ephemeral",  // 自分だけ見えるように設定
+    });
+  } catch (error) {
+    console.error("ユーザーポイント取得エラー:", error);
+    await axios.post(command.response_url, {
+      text: "データの取得に失敗しました",
+      response_type: "ephemeral",  // 自分だけ見えるように設定
     });
   }
 }
