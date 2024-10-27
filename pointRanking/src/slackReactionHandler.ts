@@ -5,7 +5,7 @@ import { ReactionData, saveReactionData } from "./saveReaction";
 // slackのリアクションをsupabaseに保存する
 (async () => {
   const { slackBot, PORT } = useSlackbot();
-  const { edgeFunctionUrl, serviceRoleKey } = useSupabase();
+  const { supabase, edgeFunctionUrl, serviceRoleKey } = useSupabase();
 
   // Slackリアクションが追加された時の処理
   slackBot.event("reaction_added", async ({ event, client }) => {
@@ -72,7 +72,45 @@ import { ReactionData, saveReactionData } from "./saveReaction";
 
     // リアクションデータの保存
     try {
-      const isReactionSaved = await saveReactionData(payload);
+      // リアクションが既に存在するか確認
+      const { data: existingReactions, error: reactionsFetchError } = await supabase
+        .from("Reaction")
+        .select("reaction_id")
+        .eq("message_id", messageId)
+        .eq("reaction_user_id", reactionUserId)
+        .eq("emoji_id", emojiId);
+
+      if (reactionsFetchError) {
+        console.error("Reactionテーブルの取得エラー:", reactionsFetchError);
+        return;
+      }
+
+      let isReactionSaved = false;
+
+      if (existingReactions.length === 0) {
+        // リアクションが存在しない場合、ポイントを加算して保存
+        isReactionSaved = await saveReactionData(payload);
+      } else {
+        // リアクションが存在する場合、ポイントを加算せずに保存
+        const { error: reactionError } = await supabase
+          .from("Reaction")
+          .upsert(
+            {
+              reaction_id: payload.reactionId,
+              created_at: new Date().toISOString(),
+              message_id: payload.messageId,
+              reaction_user_id: payload.reactionUserId,
+              emoji_id: payload.emojiId,
+            },
+            { onConflict: "reaction_id" }
+          );
+
+        if (reactionError) {
+          console.error("Reactionテーブルの更新エラー:", reactionError);
+        } else {
+          isReactionSaved = true;
+        }
+      }
 
       if (isReactionSaved) {
         console.log("リアクションデータを保存しました");
