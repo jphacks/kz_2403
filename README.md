@@ -2,6 +2,11 @@
 
 ![](MoreReaction.png)
 
+デモ動画
+
+https://github.com/user-attachments/assets/27493b6f-46df-46cc-92cc-f6b3bd1ef296
+
+
 ## 製品概要
 
 **Slackでのコミュニケーションをもっと気軽に、もっと楽しく！**
