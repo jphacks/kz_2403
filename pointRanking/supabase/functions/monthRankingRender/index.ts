@@ -1,5 +1,5 @@
 import { serve } from "https://deno.land/std@0.114.0/http/server.ts";
-import { createClient } from "https://deno.land/x/supabase@1.0.0/mod.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import axios from 'https://cdn.skypack.dev/axios';
 
 const supabaseUrl = Deno.env.get("SUPABASE_URL") || "";
