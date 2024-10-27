@@ -9,6 +9,10 @@ app = FastAPI(
 
 app.include_router(router, prefix="/api/v1")
 
+@app.get("/")
+async def root():
+    return {"message": "Emoji Recommender API"}
+
 @app.post("/ping")
 async def ping():
     try:
