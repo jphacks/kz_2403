@@ -1,5 +1,6 @@
 # src/models/processor.py
 
+from datetime import datetime
 import pandas as pd
 import numpy as np
 from transformers import BertTokenizer, BertModel
@@ -89,6 +90,7 @@ class DataProcessor:
         from sklearn.feature_extraction.text import CountVectorizer
 
         vectorizer = CountVectorizer()
+        emojis_df["label"] = emojis_df["label"].fillna(emojis_df["emoji_name"])
         emoji_meanings = vectorizer.fit_transform(emojis_df["label"])
 
         emoji_features = pd.DataFrame(
@@ -118,13 +120,16 @@ class DataProcessor:
         print("絵文字特徴量の作成中...")
         emoji_features = self.create_emoji_features(emojis_df)
 
+        # messages_df["created_at"] = messages_df["created_at"].apply(lambda x: datetime.fromisoformat(x).timestamp())
+        # messages_df["updated_at"] = messages_df["updated_at"].apply(lambda x: datetime.fromisoformat(x).timestamp())
+
         print("訓練データの結合中...")
         message_df = pd.concat([
             message_features,
             pd.DataFrame({
                 'message_user_id': messages_df["message_user_id"],
                 'message_id': messages_df["message_id"],
-                'ts': messages_df["ts"].astype(float)
+                # 'ts': messages_df["created_at"]
             })
         ], axis=1)
 
