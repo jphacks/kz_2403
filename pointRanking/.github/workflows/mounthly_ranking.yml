@@ -2,7 +2,7 @@ name: Monthly Ranking
 
 on:
   schedule:
-    - cron: '0 0 27 10 30' # 毎月27日の00:00に実行
+    - cron: '0 0 27 10 38' # 毎月27日の00:00に実行
 
 jobs:
   call-edge-function:
