@@ -1,0 +1,12 @@
+name: Monthly Ranking
+
+on:
+  schedule:
+    - cron: '43 10 27 * *'
+
+jobs:
+  call-edge-function:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Call Edge Function
+        run: curl -X POST https://pmuyoodzkluhaucxcaxm.supabase.co/functions/v1/monthRankingRender
