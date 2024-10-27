@@ -1,0 +1,17 @@
+version: '3.8'
+
+services:
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "30808:30808"
+    environment:
+      - ENV_FILE=.env
+    restart: always
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:30808/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3

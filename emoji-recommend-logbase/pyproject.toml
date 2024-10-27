@@ -1,0 +1,27 @@
+[project]
+name = "emoji-recommendation"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+    "fastapi>=0.104.0",
+    "uvicorn>=0.24.0",
+    "pandas>=2.1.0",
+    "numpy>=1.24.0",
+    "scikit-learn>=1.3.0",
+    "transformers>=4.34.0",
+    "torch>=2.1.0",
+    "emoji>=2.8.0",
+    "joblib>=1.3.0",
+    "pydantic>=2.4.0",
+    "pydantic-settings>=2.6.0",
+    "ruff>=0.7.1",
+    "pre-commit>=4.0.1",
+    "supabase>=2.9.1",
+    "python-dotenv>=1.0.1",
+]
+
+
+[tool.uv.sources]
+emoji-recommendation = { workspace = true }
