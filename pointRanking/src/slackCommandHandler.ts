@@ -11,6 +11,7 @@ const { supabase } = useSupabase();
 slackBot.command("/monthranking", async ({ command, ack }) => {
   try {
     await ack();  // 即座にACKを返すことで応答速度を最大化
+    handleMonthRanking(command).catch(console.error); 
   } catch (error) {
     console.error("ackのエラー:", error);
   }
