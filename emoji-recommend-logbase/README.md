@@ -8,7 +8,7 @@
 git clone <repository-url>
 cd emoji-recommend-logbase
 
-
+pip install uv
 
 uv venv
 source .venv/bin/activate # Windows: .venv\Scripts\activate

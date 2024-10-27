@@ -20,12 +20,9 @@ dependencies = [
     "pre-commit>=4.0.1",
     "supabase>=2.9.1",
     "python-dotenv>=1.0.1",
+    "emoji-recommendation>=0.1.0",
 ]
 
-[tool.uv]
-dev-dependencies = [
-    "emoji-recommendation",
-]
 
 [tool.uv.sources]
 emoji-recommendation = { workspace = true }
