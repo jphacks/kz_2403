@@ -53,7 +53,26 @@ export async function saveReactionData({
 
     if (userHasReacted) {
       console.log("ユーザーは既にこのメッセージにリアクションを付けています。");
-      return false;
+      // リアクションデータのみ保存
+      const { error: reactionError } = await supabase
+        .from("Reaction")
+        .upsert(
+          {
+            reaction_id: reactionId,
+            created_at: new Date().toISOString(),
+            message_id: messageId,
+            reaction_user_id: reactionUserId,
+            emoji_id: emojiId,
+          },
+          { onConflict: "reaction_id" }
+        );
+
+      if (reactionError) {
+        console.error("Reactionテーブルの更新エラー:", reactionError);
+        return false;
+      }
+
+      return true;
     }
 
     // Emojiテーブルに絵文字が存在するか確認し、存在しない場合は追加
