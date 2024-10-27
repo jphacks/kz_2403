@@ -102,5 +102,8 @@ class DataManager:
         else:
             print("キャッシュされたデータを使用")
             data = self._load_from_csv()
+        
+        for df_name in data.keys():
+            data[df_name] = data[df_name].drop(['created_at', 'updated_at'], axis=1, errors='ignore')
 
         return data
