@@ -34,7 +34,7 @@ import { ReactionData, saveReactionData } from "./saveReaction";
 
       if (result.messages && result.messages.length > 0) {
         const message = result.messages[0];
-        messageUserId = result.messages[0].user || "unknown_user";
+        messageUserId = message.user || "unknown_user";
         messageText = message.text || "unknown";
       }
     } catch (error) {
@@ -72,6 +72,37 @@ import { ReactionData, saveReactionData } from "./saveReaction";
 
     // リアクションデータの保存
     try {
+      // メッセージが存在するか確認し、存在しない場合は追加
+      const { data: existingMessage, error: messageFetchError } = await supabase
+        .from("Message")
+        .select("message_id")
+        .eq("message_id", messageId)
+        .single();
+
+      if (messageFetchError && messageFetchError.code !== "PGRST116") {
+        console.error("Messageテーブルの取得エラー:", messageFetchError);
+        return;
+      }
+
+      if (!existingMessage) {
+        const { error: messageInsertError } = await supabase
+          .from("Message")
+          .insert([
+            {
+              message_id: messageId,
+              created_at: new Date().toISOString(),
+              message_text: messageText,
+              message_user_id: messageUserId,
+              channnel_id: channelId,
+            },
+          ]);
+
+        if (messageInsertError) {
+          console.error("Messageテーブルの挿入エラー:", messageInsertError);
+          return;
+        }
+      }
+
       // リアクションが既に存在するか確認
       const { data: existingReactions, error: reactionsFetchError } = await supabase
         .from("Reaction")
