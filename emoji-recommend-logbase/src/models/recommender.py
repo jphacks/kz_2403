@@ -57,7 +57,6 @@ class EmojiRecommender:
         print(f"訓練データのサンプル数: {X.shape[0]}")
         self.model.fit(X, y)
         print("学習完了")
-        print(X.keys())
 
     def predict(self, features: np.ndarray, top_k: int = 3) -> list:
         """新しいメッセージに対する絵文字の予測"""
@@ -103,7 +102,6 @@ class EmojiRecommender:
             "user_feature_defaults": self.user_feature_defaults
         }
 
-        print(model_data)
         joblib.dump(model_data, path)
         print(f"モデルを保存しました: {path}")
         print(f"User features shape: {self.user_features.shape}")

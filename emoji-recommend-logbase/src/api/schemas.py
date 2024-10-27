@@ -17,7 +17,7 @@ class MessageInput(BaseModel):
         json_schema_extra = {
             "example": {
                 "message_text": "すばらしい成果ですね！",
-                "user_id": "U123456",
+                "user_id": "U123",
                 "channel_id": "C789012",
                 "ts": "1234567890.123456",
             }
