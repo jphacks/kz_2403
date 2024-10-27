@@ -56,48 +56,50 @@ export async function saveReactionData({
       return false;
     }
 
-    // Messageテーブルにメッセージが存在するか確認し、存在しない場合は追加
-    const { data: existingMessage, error: messageFetchError } = await supabase
-      .from("Message")
-      .select("message_id")
-      .eq("message_id", messageId)
+    // Emojiテーブルに絵文字が存在するか確認し、存在しない場合は追加
+    const { data: existingEmoji, error: emojiFetchError } = await supabase
+      .from("Emoji")
+      .select("emoji_id")
+      .eq("emoji_id", emojiId)
       .single();
 
-    if (messageFetchError && messageFetchError.code !== "PGRST116") {
-      console.error("Messageテーブルの取得エラー:", messageFetchError);
+    if (emojiFetchError && emojiFetchError.code !== "PGRST116") {
+      console.error("Emojiテーブルの取得エラー:", emojiFetchError);
       return false;
     }
 
-    if (!existingMessage) {
-      const { error: messageInsertError } = await supabase
-        .from("Message")
+    if (!existingEmoji) {
+      const { error: emojiInsertError } = await supabase
+        .from("Emoji")
         .insert([
           {
-            message_id: messageId,
-            created_at: new Date().toISOString(),
-            message_text: messageText,
-            message_user_id: messageUserId,
-            channnel_id: channelId,
+            emoji_id: emojiId,
+            emoji_name: emojiName,
+            usage_num: 1,
+            add_user_id: reactionUserId,
+            updated_at: new Date().toISOString(),
           },
         ]);
 
-      if (messageInsertError) {
-        console.error("Messageテーブルの挿入エラー:", messageInsertError);
+      if (emojiInsertError) {
+        console.error("Emojiテーブルの挿入エラー:", emojiInsertError);
         return false;
       }
     }
 
     // Reactionテーブルの更新
-    const { error: reactionError } = await supabase.from("Reaction").upsert(
-      {
-        reaction_id: reactionId,
-        created_at: new Date().toISOString(),
-        message_id: messageId,
-        reaction_user_id: reactionUserId,
-        emoji_id: emojiId,
-      },
-      { onConflict: "reaction_id" }
-    );
+    const { error: reactionError } = await supabase
+      .from("Reaction")
+      .upsert(
+        {
+          reaction_id: reactionId,
+          created_at: new Date().toISOString(),
+          message_id: messageId,
+          reaction_user_id: reactionUserId,
+          emoji_id: emojiId,
+        },
+        { onConflict: "reaction_id" }
+      );
 
     if (reactionError) {
       console.error("Reactionテーブルの更新エラー:", reactionError);
@@ -135,46 +137,22 @@ export async function saveReactionData({
       return false;
     }
 
-    // Emojiテーブルの更新（存在しない場合は新規作成）
-    const { data: existingEmoji, error: emojiFetchError } = await supabase
-      .from("Emoji")
-      .select("emoji_id, usage_num, add_user_id")
-      .eq("emoji_id", emojiId)
-      .single();
+    // Messageテーブルの更新
+    const { error: messageError } = await supabase
+      .from("Message")
+      .upsert(
+        {
+          message_id: messageId,
+          created_at: new Date().toISOString(),
+          message_text: messageText,
+          message_user_id: messageUserId,
+          channnel_id: channelId,
+        },
+        { onConflict: "message_id" }
+      );
 
-    if (emojiFetchError && emojiFetchError.code !== "PGRST116") {
-      console.error("Emojiテーブルの取得エラー:", emojiFetchError);
-      return false;
-    }
-
-    let addUserId = reactionUserId; // デフォルトはリアクションしたユーザー
-
-    if (!existingEmoji) {
-      try {
-        // Slack APIを使用して絵文字のリストを取得
-        const emojiList = await slackClient.emoji.list();
-        if (emojiList.ok && emojiList.emoji && emojiList.emoji[emojiName]) {
-          // 絵文字の作成者情報を取得
-          addUserId = reactionUserId;
-        }
-      } catch (error) {
-        console.error("絵文字リストの取得エラー:", error);
-      }
-    }
-
-    const { error: emojiError } = await supabase.from("Emoji").upsert(
-      {
-        emoji_id: emojiId,
-        emoji_name: emojiName,
-        usage_num: existingEmoji ? existingEmoji.usage_num + 1 : 1,
-        add_user_id: existingEmoji ? existingEmoji.add_user_id : addUserId,
-        updated_at: new Date().toISOString(),
-      },
-      { onConflict: "emoji_id" }
-    );
-
-    if (emojiError) {
-      console.error("Emojiテーブルの更新エラー:", emojiError);
+    if (messageError) {
+      console.error("Messageテーブルの更新エラー:", messageError);
       return false;
     }
 
@@ -182,9 +160,7 @@ export async function saveReactionData({
     // MonthLogテーブルの更新
     const { data: existingMonthLog, error: monthLogFetchError } = await supabase
       .from("MonthLog")
-      .select(
-        "month_total_point, reaction_1st_num, add_emoji_num, message_send_num"
-      )
+      .select("month_total_point, reaction_1st_num, add_emoji_num, message_send_num")
       .eq("result_month", formattedResultMonth)
       .eq("user_id", userId)
       .single();
@@ -206,17 +182,19 @@ export async function saveReactionData({
       messageSendNum += existingMonthLog.message_send_num;
     }
 
-    const { error: monthLogError } = await supabase.from("MonthLog").upsert(
-      {
-        result_month: formattedResultMonth,
-        user_id: userId,
-        month_total_point: monthTotalPoints,
-        reaction_1st_num: reaction1stNum,
-        add_emoji_num: addEmojiNum,
-        message_send_num: messageSendNum,
-      },
-      { onConflict: "result_month,user_id" }
-    );
+    const { error: monthLogError } = await supabase
+      .from("MonthLog")
+      .upsert(
+        {
+          result_month: formattedResultMonth,
+          user_id: userId,
+          month_total_point: monthTotalPoints,
+          reaction_1st_num: reaction1stNum,
+          add_emoji_num: addEmojiNum,
+          message_send_num: messageSendNum,
+        },
+        { onConflict: "result_month,user_id" }
+      );
 
     if (monthLogError) {
       console.error("MonthLogテーブルの更新エラー:", monthLogError);
