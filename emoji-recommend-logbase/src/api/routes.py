@@ -48,8 +48,6 @@ async def predict_emojis(
         features = np.concatenate([
             message_vector,  
             user_vector,    
-            channel_features,
-            [message.ts]    
         ])
 
         predictions = recommender.predict(features)
