@@ -1,6 +1,5 @@
 import { serve } from "https://deno.land/std/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
-import axios from 'https://cdn.skypack.dev/axios';
 
 const supabaseUrl = Deno.env.get("SUPABASE_URL") || "";
 const supabaseServiceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") || "";
@@ -30,14 +29,20 @@ serve(async (req) => {
     const { data: rankingData, error } = await supabase
       .from("MonthLog")
       .select("user_id, month_total_point")
-      .eq("result_month", currentMonth)
+      .eq("result_month", `${currentMonth}-01`) // 正しい日付形式に修正
       .order("month_total_point", { ascending: false })
       .limit(10);
 
     if (error) {
       console.error("MonthLogテーブルの取得エラー:", error);
-      await axios.post(slackWebhookUrl, {
-        text: "データの取得に失敗しました",
+      await fetch(slackWebhookUrl, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          text: "データの取得に失敗しました",
+        }),
       });
       return new Response("データの取得に失敗しました", { status: 500 });
     }
@@ -51,8 +56,14 @@ serve(async (req) => {
 
     if (usersError) {
       console.error("Userテーブルの取得エラー:", usersError);
-      await axios.post(slackWebhookUrl, {
-        text: "データの取得に失敗しました",
+      await fetch(slackWebhookUrl, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          text: "データの取得に失敗しました",
+        }),
       });
       return new Response("データの取得に失敗しました", { status: 500 });
     }
@@ -78,8 +89,14 @@ serve(async (req) => {
       .join("\n");
 
     // ランキングをSlackに投稿
-    await axios.post(slackWebhookUrl, {
-      text: `今月のポイントランキング\n${rankingText}`,
+    await fetch(slackWebhookUrl, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        text: `今月のポイントランキング\n${rankingText}`,
+      }),
     });
 
     return new Response("OK", { status: 200 });
