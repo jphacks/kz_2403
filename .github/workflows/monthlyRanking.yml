@@ -2,7 +2,7 @@ name: Monthly Ranking
 
 on:
   schedule:
-    - cron: '43 10 27 * *'
+    - cron: '5 2 27 * *'
 
 jobs:
   call-edge-function:
