@@ -1,6 +1,6 @@
 {
   "compilerOptions": {
-    "target": "es2020",
+    "target": "ES2020",
     "module": "commonjs",
     "moduleResolution": "node",
     "outDir": "./dist",
@@ -8,6 +8,8 @@
     "forceConsistentCasingInFileNames": true,
     "strict": true,
     "skipLibCheck": true,
+    "lib": ["ESNext", "DOM"]
   },
-  "include": ["./src/**/*.ts"]
+  "include": ["./src/**/*.ts"],
+  "exclude": ["./supabase/**/*.ts"]  // Edge Functionsのディレクトリを除外
 }
