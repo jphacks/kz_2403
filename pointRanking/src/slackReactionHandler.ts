@@ -1,181 +1,75 @@
 import { useSlackbot } from "./hooks/useSlackbot";
 import { useSupabase } from "./hooks/useSupabase";
-import { ReactionData, saveReactionData } from "./saveReaction";
+import { fetchMessageInfo } from "./fetchMessageInfo";
+import { fetchUserInfo } from "./fetchUserInfo";
+import { saveReactionData } from "./saveReactionData";
+import { callEdgeFunction } from "./callEdgeFunction";
+import { ReactionData } from "./saveReaction";
+import { hasUserReactedBefore } from "./hasUserReactedBefore";
 
-// slackのリアクションをsupabaseに保存する
 (async () => {
   const { slackBot, PORT } = useSlackbot();
-  const { supabase, edgeFunctionUrl, serviceRoleKey } = useSupabase();
+  const { edgeFunctionUrl, serviceRoleKey } = useSupabase();
 
-  // Slackリアクションが追加された時の処理
   slackBot.event("reaction_added", async ({ event, client }) => {
-    const { reaction, user, item, event_ts } = event;
-    // DBに合わせて各種プロパティを変換
+    const { reaction, user, item } = event;
     const messageId = item.ts;
-    const createdAt = new Date(parseInt(event_ts) * 1000).toISOString(); // 人間に読める形にするため
+    const channelId = item.channel;
     const reactionUserId = user;
     const emojiName = reaction;
     const emojiId = `emoji-${emojiName}`;
-    const channelId = item.channel;
 
-    // リアクションを受けたメッセージの送信者のIDを取得
-    let messageUserId = "unknown_user"; //初期値
-    let userName = "unknown_user"; //初期値
-    let messageText = "unknown"; //初期値
+    // メッセージ情報の取得
+    const { messageUserId, messageText } = await fetchMessageInfo(
+      client,
+      channelId,
+      messageId
+    );
 
-    try {
-      // メッセージ情報を取得して、送信者のIDを取得
-      const result = await client.conversations.history({
-        channel: channelId,
-        latest: messageId,
-        inclusive: true,
-        limit: 1,
-      });
+    // ユーザー情報の取得
+    const userName = await fetchUserInfo(client, reactionUserId);
 
-      if (result.messages && result.messages.length > 0) {
-        const message = result.messages[0];
-        messageUserId = message.user || "unknown_user";
-        messageText = message.text || "unknown";
-      }
-    } catch (error) {
-      console.error("メッセージ取得", error);
-    }
-
-    // ユーザー情報を取得し、ユーザー名を取得
-    try {
-      const userInfo = await client.users.info({ user: reactionUserId });
-      if (userInfo.user && userInfo.user.profile) {
-        userName =
-          userInfo.user.profile.real_name ||
-          userInfo.user.profile.display_name ||
-          "unknown";
-      }
-    } catch (error) {
-      console.error("ユーザー情報取得", error);
-    }
-
-    // Supabaseに保存するペイロード
+    // ペイロードの作成
     const payload: ReactionData = {
       userId: reactionUserId,
       userName,
       messageId,
-      messageText,
+      messageText: messageText || "メッセージなし",
       messageUserId,
       channelId,
       reactionUserId,
-      reactionId: `${messageId}-${reactionUserId}`,
+      reactionId: `${messageId}-${reactionUserId}-${emojiId}`,
       emojiId,
       emojiName,
       resultMonth: new Date().toISOString().slice(0, 7),
       points: 1,
     };
 
-    // リアクションデータの保存
     try {
-      // メッセージが存在するか確認し、存在しない場合は追加
-      const { data: existingMessage, error: messageFetchError } = await supabase
-        .from("Message")
-        .select("message_id")
-        .eq("message_id", messageId)
-        .single();
+      // 既にリアクションをつけているかどうかをチェック
+      const hasReacted = await hasUserReactedBefore(messageId, reactionUserId);
+      console.log(`Debug - hasReacted:`, JSON.stringify(hasReacted));
 
-      if (messageFetchError && messageFetchError.code !== "PGRST116") {
-        console.error("Messageテーブルの取得エラー:", messageFetchError);
-        return;
-      }
-
-      if (!existingMessage) {
-        const { error: messageInsertError } = await supabase
-          .from("Message")
-          .insert([
-            {
-              message_id: messageId,
-              created_at: new Date().toISOString(),
-              message_text: messageText,
-              message_user_id: messageUserId,
-              channnel_id: channelId,
-            },
-          ]);
-
-        if (messageInsertError) {
-          console.error("Messageテーブルの挿入エラー:", messageInsertError);
-          return;
-        }
-      }
-
-      // リアクションが既に存在するか確認
-      const { data: existingReactions, error: reactionsFetchError } = await supabase
-        .from("Reaction")
-        .select("reaction_id")
-        .eq("message_id", messageId)
-        .eq("reaction_user_id", reactionUserId)
-        .eq("emoji_id", emojiId);
-
-      if (reactionsFetchError) {
-        console.error("Reactionテーブルの取得エラー:", reactionsFetchError);
-        return;
-      }
-
-      let isReactionSaved = false;
-
-      if (existingReactions.length === 0) {
-        // リアクションが存在しない場合、ポイントを加算して保存
-        isReactionSaved = await saveReactionData(payload);
+      if (hasReacted.hasReacted) {
+        console.log("既に他のリアクションで初回ポイントが付与済みのため、スキップします")
       } else {
-        // リアクションが存在する場合、ポイントを加算せずに保存
-        const { error: reactionError } = await supabase
-          .from("Reaction")
-          .upsert(
-            {
-              reaction_id: payload.reactionId,
-              created_at: new Date().toISOString(),
-              message_id: payload.messageId,
-              reaction_user_id: payload.reactionUserId,
-              emoji_id: payload.emojiId,
-            },
-            { onConflict: "reaction_id" }
-          );
+        // リアクションデータを保存
+        const isSaved = await saveReactionData(payload);
 
-        if (reactionError) {
-          console.error("Reactionテーブルの更新エラー:", reactionError);
+        if (!isSaved) {
+          console.log("既に同じリアクションが存在するため、スキップします");
         } else {
-          isReactionSaved = true;
+          console.log("初めてのメッセージへのリアクションなので、ポイントを付与します");
+          const edgeResponse = await callEdgeFunction(edgeFunctionUrl, serviceRoleKey, messageId, reactionUserId);
+          console.log("Edge Function呼び出し成功:", edgeResponse);
         }
-      }
-
-      if (isReactionSaved) {
-        console.log("リアクションデータを保存しました");
-
-        // Edge Functionの呼び出し
-        try {
-          const response = await fetch(edgeFunctionUrl, {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-              Authorization: `Bearer ${serviceRoleKey}`,
-            },
-            body: JSON.stringify({ messageId, reactionUserId }),
-          });
-
-          if (!response.ok) {
-            const errorData = await response.json();
-            console.error("Edge Functionエラー:", errorData);
-          } else {
-            const data = await response.json();
-            console.log("Edge Function呼び出し成功:", data);
-          }
-        } catch (error) {
-          console.error("Edge Functionの呼び出しエラー:", error);
-        }
-      } else {
-        console.log("リアクションデータの保存に失敗しました");
       }
     } catch (error) {
-      console.error("リアクションデータの保存に失敗しました", error);
+      console.error("リアクション追加イベントエラー:", error);
     }
   });
 
   // アプリの起動
   await slackBot.start(PORT || 3000);
-  console.log(`${PORT}を立ち上げました`);
+  console.log(`${PORT}を起動しました`);
 })();
