@@ -1,6 +1,9 @@
 import { useSupabase } from "./hooks/useSupabase";
 
-export const hasUserReactedBefore = async (messageId: string, reactionUserId: string): Promise<{
+export const hasUserReactedBefore = async (
+  messageId: string,
+  reactionUserId: string
+): Promise<{
   hasReacted: boolean;
   existingReaction?: any;
 }> => {
@@ -14,8 +17,8 @@ export const hasUserReactedBefore = async (messageId: string, reactionUserId: st
       .eq("reaction_user_id", reactionUserId)
       .maybeSingle();
 
-    console.log('haseUserReactedBefore - data', data );
-    console.log('haseUserReactedBefore - error', error );
+    console.log("haseUserReactedBefore - data", data);
+    console.log("haseUserReactedBefore - error", error);
 
     if (error) {
       if (error.code === "PGRST116") {
@@ -31,7 +34,7 @@ export const hasUserReactedBefore = async (messageId: string, reactionUserId: st
     return {
       hasReacted: data !== null,
       existingReaction: data,
-    }
+    };
   } catch (error) {
     console.error("リアクション履歴の確認エラー:", error);
     return { hasReacted: false };
