@@ -60,7 +60,7 @@ import { hasUserReactedBefore } from "./hasUserReactedBefore";
           console.log("既に同じリアクションが存在するため、スキップします");
         } else {
           console.log("初めてのメッセージへのリアクションなので、ポイントを付与します");
-          const edgeResponse = await callEdgeFunction(edgeFunctionUrl, serviceRoleKey, messageId, reactionUserId);
+          const edgeResponse = await callEdgeFunction('points_add', serviceRoleKey, messageId, reactionUserId);
           console.log("Edge Function呼び出し成功:", edgeResponse);
         }
       }
