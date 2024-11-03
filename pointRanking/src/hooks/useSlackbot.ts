@@ -3,7 +3,7 @@ import { load } from "ts-dotenv";
 import { WebClient } from "@slack/web-api";
 
 const path = require('path');
-require('dotenv').config({ path: path.resolve(__dirname, '../../.env') });
+require('dotenv').config({ path: path.resolve(__dirname, '../../../.env') });
 
 const env = load({
   SLACK_BOT_TOKEN: {

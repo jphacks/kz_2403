@@ -3,7 +3,7 @@ import { Database } from "../../database.types";
 import { createClient } from "@supabase/supabase-js";
 
 const path = require('path');
-require('dotenv').config({ path: path.resolve(__dirname, '../../.env') });
+require('dotenv').config({ path: path.resolve(__dirname, '../../../.env') });
 
 const env = load({
   SUPABASE_URL: {
