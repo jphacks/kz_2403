@@ -19,13 +19,8 @@ export const ensureMessageExists = async (
     .eq("message_id", payload.messageId)
     .single();
 
-  if (selectError) {
-    console.error("Messageテーブルの取得エラー:", selectError);
-    return false;
-  }
-
-  // メッセージが存在しない場合は保存
-  if (!messageExists) {
+  // PGRST116エラーの場合はメッセージが存在しないため、新しいメッセージを挿入
+  if (selectError && selectError.code === "PGRST116") {
     const { error: insertMessageError } = await supabase
       .from("Message")
       .insert([
@@ -43,6 +38,10 @@ export const ensureMessageExists = async (
       console.error("Messageテーブルの挿入エラー:", insertMessageError);
       return false;
     }
+  } else if (selectError) {
+    // その他のエラーの場合はログを出力
+    console.error("Messageテーブルの取得エラー:", selectError);
+    return false;
   }
 
   return true;
