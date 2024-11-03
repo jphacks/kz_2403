@@ -1,24 +1,23 @@
-import { buildEdgeUrl } from "./buildEdgeUrl";
+import { buildEdgeUrl } from "../buildEdgeUrl";
 
 export const callEdgeFunction = async (
   pathKey: string,
   serviceRoleKey: string,
-  messageId: string,
-  reactionUserId: string
-): Promise<EdgeFunctionResponse | null> => {
+  payload: Record<string, any>
+): Promise<any> => {
   try {
     const edgeFunctionUrl = buildEdgeUrl(pathKey);
     const url = new URL(edgeFunctionUrl);
-    url.searchParams.set('apikey', serviceRoleKey);
+    url.searchParams.set("apikey", serviceRoleKey);
 
     const response = await fetch(url.toString(), {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        "Authorization": `Bearer ${serviceRoleKey}`,
-        "apikey": serviceRoleKey
+        Authorization: `Bearer ${serviceRoleKey}`,
+        apikey: serviceRoleKey,
       },
-      body: JSON.stringify({ messageId, reactionUserId }),
+      body: JSON.stringify(payload),
     });
 
     const data = await response.json();

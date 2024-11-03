@@ -3,9 +3,10 @@ import { useSupabase } from "./hooks/useSupabase";
 import { fetchMessageInfo } from "./fetchMessageInfo";
 import { fetchUserInfo } from "./fetchUserInfo";
 import { saveReactionData } from "./saveReactionData";
-import { callEdgeFunction } from "./callEdgeFunction";
+import { callEdgeFunction } from "./edgeFunction/callEdgeFunction";
 import { ReactionData } from "./saveReaction";
 import { hasUserReactedBefore } from "./hasUserReactedBefore";
+import { callAddPointsEdgeFunction } from "./edgeFunction/callAddPointsEdgeFunction";
 
 (async () => {
   const { slackBot, PORT } = useSlackbot();
@@ -23,7 +24,7 @@ import { hasUserReactedBefore } from "./hasUserReactedBefore";
     const { messageUserId, messageText } = await fetchMessageInfo(
       client,
       channelId,
-      messageId
+      messageId,
     );
 
     // ユーザー情報の取得
@@ -52,7 +53,7 @@ import { hasUserReactedBefore } from "./hasUserReactedBefore";
 
       if (hasReacted.hasReacted) {
         console.log(
-          "既に他のリアクションで初回ポイントが付与済みのため、スキップします"
+          "既に他のリアクションで初回ポイントが付与済みのため、スキップします",
         );
       } else {
         // リアクションデータを保存
@@ -62,14 +63,9 @@ import { hasUserReactedBefore } from "./hasUserReactedBefore";
           console.log("既に同じリアクションが存在するため、スキップします");
         } else {
           console.log(
-            "初めてのメッセージへのリアクションなので、ポイントを付与します"
+            "初めてのメッセージへのリアクションなので、ポイントを付与します",
           );
-          const edgeResponse = await callEdgeFunction(
-            "points_add",
-            serviceRoleKey,
-            messageId,
-            reactionUserId
-          );
+          const edgeResponse = await callAddPointsEdgeFunction(serviceRoleKey, messageId, reactionUserId);
           console.log("Edge Function呼び出し成功:", edgeResponse);
         }
       }
