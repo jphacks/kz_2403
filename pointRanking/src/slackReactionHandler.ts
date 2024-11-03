@@ -3,10 +3,21 @@ import { useSupabase } from "./hooks/useSupabase";
 import { fetchMessageInfo } from "./fetchMessageInfo";
 import { fetchUserInfo } from "./fetchUserInfo";
 import { saveReactionData } from "./saveReactionData";
-import { callEdgeFunction } from "./edgeFunction/callEdgeFunction";
 import { ReactionData } from "./saveReaction";
 import { hasUserReactedBefore } from "./hasUserReactedBefore";
 import { callAddPointsEdgeFunction } from "./edgeFunction/callAddPointsEdgeFunction";
+import { callAddKeywordPointsEdgeFunction } from "./edgeFunction/callAddKeywordPointsEdgeFunction";
+import { saveMessageData } from "./saveMessageData"; // 新しく追加
+
+interface MessageEvent {
+  type: string;
+  channel: string;
+  user: string;
+  text: string;
+  ts: string;
+  event_ts: string;
+  channel_type: string;
+}
 
 (async () => {
   const { slackBot, PORT } = useSlackbot();
@@ -71,6 +82,37 @@ import { callAddPointsEdgeFunction } from "./edgeFunction/callAddPointsEdgeFunct
       }
     } catch (error) {
       console.error("リアクション追加イベントエラー:", error);
+    }
+  });
+
+  slackBot.event("message", async ({ event, client }) => {
+    const messageEvent = event as MessageEvent;
+    const { user, ts, channel_type } = messageEvent;
+    const messageId = ts;
+    const messageUserId = user;
+    const channelId = messageEvent.channel;
+
+    // メッセージデータを保存
+    const isMessageSaved = await saveMessageData({
+      messageId,
+      messageText: messageEvent.text,
+      messageUserId,
+      channelId,
+    });
+
+    if (!isMessageSaved) {
+      console.error("メッセージの保存に失敗しました");
+      return;
+    }
+
+    // チャンネルに投稿されたメッセージだけを処理
+    if (channel_type === "channel") {
+      try {
+        const edgeResponse = await callAddKeywordPointsEdgeFunction(serviceRoleKey, messageId, messageUserId);
+        console.log("Edge Function呼び出し成功:", edgeResponse);
+      } catch (error) {
+        console.error("メッセージチャンネルイベントエラー:", error);
+      }
     }
   });
 
