@@ -8,6 +8,7 @@ import { hasUserReactedBefore } from "./hasUserReactedBefore";
 import { callAddPointsEdgeFunction } from "./edgeFunction/callAddPointsEdgeFunction";
 import { callAddKeywordPointsEdgeFunction } from "./edgeFunction/callAddKeywordPointsEdgeFunction";
 import { saveMessageData } from "./saveMessageData"; // 新しく追加
+import { callAddMentionPointsEdgeFunction } from "./edgeFunction/callAddMentionPointsEdgeFunction";
 
 interface MessageEvent {
   type: string;
@@ -108,8 +109,10 @@ interface MessageEvent {
     // チャンネルに投稿されたメッセージだけを処理
     if (channel_type === "channel") {
       try {
-        const edgeResponse = await callAddKeywordPointsEdgeFunction(serviceRoleKey, messageId, messageUserId);
-        console.log("Edge Function呼び出し成功:", edgeResponse);
+        const edgeKeywordResponse = await callAddKeywordPointsEdgeFunction(serviceRoleKey, messageId, messageUserId);
+        const edgeMentionResponse = await callAddMentionPointsEdgeFunction(serviceRoleKey, messageId, messageUserId);
+        console.log("Edge Function呼び出し成功:", edgeKeywordResponse);
+        console.log("Edge Function(addMentionPoints)の呼び出し成功", edgeMentionResponse );
       } catch (error) {
         console.error("メッセージチャンネルイベントエラー:", error);
       }
