@@ -115,7 +115,7 @@ serve(async (req) => {
     );
   } catch (error) {
     console.error("エッジファンクションのエラー:", error);
-    return new Response(JSON.stringify({ error: error.message }), {
+    return new Response(JSON.stringify({ error: error }), {
       status: 500,
       headers: { "Access-Control-Allow-Origin": "*" },
     });

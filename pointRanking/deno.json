@@ -1,0 +1,12 @@
+{
+  "compilerOptions": {
+    "lib": ["esnext", "dom"],
+    "strict": true
+  },
+  "tasks": {
+    "start": "deno run --allow-net --allow-env ./src/edge_functions/index.ts"
+  },
+  "imports": {
+    "@supabase/supabase-js": "https://esm.sh/@supabase/supabase-js@2"
+  }
+}
