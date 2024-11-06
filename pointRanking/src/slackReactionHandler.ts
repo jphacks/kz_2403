@@ -10,6 +10,7 @@ import { callAddKeywordPointsEdgeFunction } from "./edgeFunction/callAddKeywordP
 import { saveMessageData } from "./saveMessageData"; // 新しく追加
 import { callAddMentionPointsEdgeFunction } from "./edgeFunction/callAddMentionPointsEdgeFunction";
 import { callAddTimedPointsEdgeFunction } from "./edgeFunction/callAddTimedPointsEdgeFunction";
+import { callAddFileSharePointsEdgeFunction } from "./edgeFunction/callAddFileSharePointEdgeFunction";
 
 interface MessageEvent {
   type: string;
@@ -19,6 +20,7 @@ interface MessageEvent {
   ts: string;
   event_ts: string;
   channel_type: string;
+  files?: Array<{ id: string; name: string; url_private: string }>;
 }
 
 (async () => {
@@ -102,7 +104,7 @@ interface MessageEvent {
 
   slackBot.event("message", async ({ event, client }) => {
     const messageEvent = event as MessageEvent;
-    const { user, ts, channel_type } = messageEvent;
+    const { user, ts, channel_type, files } = messageEvent;
     const messageId = ts;
     const messageUserId = user;
     const channelId = messageEvent.channel;
@@ -138,6 +140,20 @@ interface MessageEvent {
           "Edge Function(addMentionPoints)の呼び出し成功",
           edgeMentionResponse
         );
+
+        // ファイル共有のチェック
+        if (files && files.length > 0) {
+          const edgeFileShareResponse =
+            await callAddFileSharePointsEdgeFunction(
+              serviceRoleKey,
+              messageId,
+              messageUserId
+            );
+          console.log(
+            "Edge Function(addFileSharePoints)の呼び出し成功",
+            edgeFileShareResponse
+          );
+        }
       } catch (error) {
         console.error("メッセージチャンネルイベントエラー:", error);
       }
