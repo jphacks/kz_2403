@@ -1,5 +1,8 @@
 import { serve } from "https://deno.land/std@0.192.0/http/server.ts";
-import { createClient, SupabaseClient } from "https://esm.sh/@supabase/supabase-js@2";
+import {
+  createClient,
+  SupabaseClient,
+} from "https://esm.sh/@supabase/supabase-js@2";
 import type { PostgrestError } from "https://esm.sh/@supabase/supabase-js@2";
 
 interface Message {
@@ -45,14 +48,20 @@ serve(async (req) => {
     const { messageId } = requestJson;
 
     if (!messageId) {
-      return new Response(JSON.stringify({ error: "messageIdが提供されていません" }), {
-        status: 400,
-        headers: { "Access-Control-Allow-Origin": "*" },
-      });
+      return new Response(
+        JSON.stringify({ error: "messageIdが提供されていません" }),
+        {
+          status: 400,
+          headers: { "Access-Control-Allow-Origin": "*" },
+        }
+      );
     }
 
     // Supabaseのクライアントを作成
-    const supabase: SupabaseClient = createClient(supabaseUrl, supabaseServiceRoleKey);
+    const supabase: SupabaseClient = createClient(
+      supabaseUrl,
+      supabaseServiceRoleKey
+    );
 
     // メッセージの取得
     const { data: messageData, error: messageError } = await supabase
@@ -63,10 +72,17 @@ serve(async (req) => {
 
     if (messageError || !messageData) {
       console.error("メッセージ取得エラー:", messageError);
-      return new Response(JSON.stringify({ error: (messageError as PostgrestError).message || "メッセージが見つかりません" }), {
-        status: 500,
-        headers: { "Access-Control-Allow-Origin": "*" },
-      });
+      return new Response(
+        JSON.stringify({
+          error:
+            (messageError as PostgrestError).message ||
+            "メッセージが見つかりません",
+        }),
+        {
+          status: 500,
+          headers: { "Access-Control-Allow-Origin": "*" },
+        }
+      );
     }
 
     const messageText = (messageData as Message).message_text;
@@ -83,10 +99,17 @@ serve(async (req) => {
 
       if (userError || !userData) {
         console.error("ユーザー取得エラー:", userError);
-        return new Response(JSON.stringify({ error: (userError as PostgrestError).message || "ユーザーが見つかりません" }), {
-          status: 500,
-          headers: { "Access-Control-Allow-Origin": "*" },
-        });
+        return new Response(
+          JSON.stringify({
+            error:
+              (userError as PostgrestError).message ||
+              "ユーザーが見つかりません",
+          }),
+          {
+            status: 500,
+            headers: { "Access-Control-Allow-Origin": "*" },
+          }
+        );
       }
 
       const currentTotalPoint = (userData as User).total_point || 0;
@@ -100,12 +123,17 @@ serve(async (req) => {
 
       if (updateError) {
         console.error("ポイント更新エラー:", updateError);
-        return new Response(JSON.stringify({ error: (updateError as PostgrestError).message }), {
-          status: 500,
-          headers: { "Access-Control-Allow-Origin": "*" },
-        });
+        return new Response(
+          JSON.stringify({ error: (updateError as PostgrestError).message }),
+          {
+            status: 500,
+            headers: { "Access-Control-Allow-Origin": "*" },
+          }
+        );
       } else {
-        console.log(`ユーザーID: ${userId} の total_point を ${newTotalPoint} に更新しました`);
+        console.log(
+          `ユーザーID: ${userId} の total_point を ${newTotalPoint} に更新しました`
+        );
         return new Response(
           JSON.stringify({ message: "ポイントを加算しました", newTotalPoint }),
           {
@@ -117,7 +145,9 @@ serve(async (req) => {
     } else {
       console.log("キーワードが含まれていないため、ポイントは加算されません");
       return new Response(
-        JSON.stringify({ message: "キーワードが含まれていないため、ポイントは加算されません" }),
+        JSON.stringify({
+          message: "キーワードが含まれていないため、ポイントは加算されません",
+        }),
         {
           status: 200,
           headers: { "Access-Control-Allow-Origin": "*" },
@@ -128,7 +158,7 @@ serve(async (req) => {
     console.error("エッジファンクションのエラー:", error);
 
     // errorを型アサーションして、messageプロパティにアクセス
-    const errorMessage = (error instanceof Error) ? error.message : String(error);
+    const errorMessage = error instanceof Error ? error.message : String(error);
 
     return new Response(JSON.stringify({ error: errorMessage }), {
       status: 500,

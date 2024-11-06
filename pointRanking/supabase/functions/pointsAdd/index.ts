@@ -63,7 +63,9 @@ serve(async (req) => {
       }
     }
 
-    console.log(`リアクションの順番: ${reactionIndex + 1}, 付与ポイント: ${points}`);
+    console.log(
+      `リアクションの順番: ${reactionIndex + 1}, 付与ポイント: ${points}`
+    );
 
     // 現在のtotal_pointを取得して加算
     const { data: user, error: userError } = await supabase
@@ -83,7 +85,9 @@ serve(async (req) => {
     const currentTotalPoints = user?.total_point || 0;
     const newTotalPoints = currentTotalPoints + points;
 
-    console.log(`現在のtotal_point: ${currentTotalPoints}, 新しいtotal_point: ${newTotalPoints}`);
+    console.log(
+      `現在のtotal_point: ${currentTotalPoints}, 新しいtotal_point: ${newTotalPoints}`
+    );
 
     // 更新処理
     const { error: updateError } = await supabase
@@ -99,7 +103,9 @@ serve(async (req) => {
       });
     }
 
-    console.log(`ユーザーID: ${reactionUserId} に ${points} ポイントを加算し、total_pointを更新しました`);
+    console.log(
+      `ユーザーID: ${reactionUserId} に ${points} ポイントを加算し、total_pointを更新しました`
+    );
 
     return new Response(
       JSON.stringify({

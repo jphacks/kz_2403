@@ -11,5 +11,5 @@
     "lib": ["ESNext", "DOM"]
   },
   "include": ["./src/**/*.ts"],
-  "exclude": ["./supabase/**/*.ts"]  // Edge Functionsのディレクトリを除外
+  "exclude": ["./supabase/**/*.ts"] // Edge Functionsのディレクトリを除外
 }
