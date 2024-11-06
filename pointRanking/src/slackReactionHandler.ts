@@ -37,7 +37,7 @@ interface MessageEvent {
     const { messageUserId, messageText } = await fetchMessageInfo(
       client,
       channelId,
-      messageId,
+      messageId
     );
 
     // ユーザー情報の取得
@@ -66,7 +66,7 @@ interface MessageEvent {
 
       if (hasReacted.hasReacted) {
         console.log(
-          "既に他のリアクションで初回ポイントが付与済みのため、スキップします",
+          "既に他のリアクションで初回ポイントが付与済みのため、スキップします"
         );
       } else {
         // リアクションデータを保存
@@ -76,12 +76,23 @@ interface MessageEvent {
           console.log("既に同じリアクションが存在するため、スキップします");
         } else {
           console.log(
-            "初めてのメッセージへのリアクションなので、ポイントを付与します",
+            "初めてのメッセージへのリアクションなので、ポイントを付与します"
           );
-          const edgeResponse = await callAddPointsEdgeFunction(serviceRoleKey, messageId, reactionUserId);
-          const edgeTimedResponse = await callAddTimedPointsEdgeFunction(serviceRoleKey, messageId, reactionUserId);
+          const edgeResponse = await callAddPointsEdgeFunction(
+            serviceRoleKey,
+            messageId,
+            reactionUserId
+          );
+          const edgeTimedResponse = await callAddTimedPointsEdgeFunction(
+            serviceRoleKey,
+            messageId,
+            reactionUserId
+          );
           console.log("Edge Function呼び出し成功:", edgeResponse);
-          console.log("Edge Function(addTimedPoints)の呼び出し成功", edgeTimedResponse);
+          console.log(
+            "Edge Function(addTimedPoints)の呼び出し成功",
+            edgeTimedResponse
+          );
         }
       }
     } catch (error) {
@@ -112,10 +123,21 @@ interface MessageEvent {
     // チャンネルに投稿されたメッセージだけを処理
     if (channel_type === "channel") {
       try {
-        const edgeKeywordResponse = await callAddKeywordPointsEdgeFunction(serviceRoleKey, messageId, messageUserId);
-        const edgeMentionResponse = await callAddMentionPointsEdgeFunction(serviceRoleKey, messageId, messageUserId);
+        const edgeKeywordResponse = await callAddKeywordPointsEdgeFunction(
+          serviceRoleKey,
+          messageId,
+          messageUserId
+        );
+        const edgeMentionResponse = await callAddMentionPointsEdgeFunction(
+          serviceRoleKey,
+          messageId,
+          messageUserId
+        );
         console.log("Edge Function呼び出し成功:", edgeKeywordResponse);
-        console.log("Edge Function(addMentionPoints)の呼び出し成功", edgeMentionResponse );
+        console.log(
+          "Edge Function(addMentionPoints)の呼び出し成功",
+          edgeMentionResponse
+        );
       } catch (error) {
         console.error("メッセージチャンネルイベントエラー:", error);
       }
