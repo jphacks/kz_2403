@@ -9,6 +9,7 @@ import { callAddPointsEdgeFunction } from "./edgeFunction/callAddPointsEdgeFunct
 import { callAddKeywordPointsEdgeFunction } from "./edgeFunction/callAddKeywordPointsEdgeFunction";
 import { saveMessageData } from "./saveMessageData"; // 新しく追加
 import { callAddMentionPointsEdgeFunction } from "./edgeFunction/callAddMentionPointsEdgeFunction";
+import { callAddTimedPointsEdgeFunction } from "./edgeFunction/callAddTimedPointsEdgeFunction";
 
 interface MessageEvent {
   type: string;
@@ -78,7 +79,9 @@ interface MessageEvent {
             "初めてのメッセージへのリアクションなので、ポイントを付与します",
           );
           const edgeResponse = await callAddPointsEdgeFunction(serviceRoleKey, messageId, reactionUserId);
+          const edgeTimedResponse = await callAddTimedPointsEdgeFunction(serviceRoleKey, messageId, reactionUserId);
           console.log("Edge Function呼び出し成功:", edgeResponse);
+          console.log("Edge Function(addTimedPoints)の呼び出し成功", edgeTimedResponse);
         }
       }
     } catch (error) {
