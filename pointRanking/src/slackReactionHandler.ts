@@ -20,7 +20,7 @@ interface MessageEvent {
   ts: string;
   event_ts: string;
   channel_type: string;
-  files?: Array<{ id: string; name: string; url_private: string}>;
+  files?: Array<{ id: string; name: string; url_private: string }>;
 }
 
 (async () => {
@@ -143,8 +143,16 @@ interface MessageEvent {
 
         // ファイル共有のチェック
         if (files && files.length > 0) {
-          const edgeFileShareResponse = await callAddFileSharePointsEdgeFunction(serviceRoleKey, messageId, messageUserId);
-          console.log("Edge Function(addFileSharePoints)の呼び出し成功", edgeFileShareResponse);
+          const edgeFileShareResponse =
+            await callAddFileSharePointsEdgeFunction(
+              serviceRoleKey,
+              messageId,
+              messageUserId
+            );
+          console.log(
+            "Edge Function(addFileSharePoints)の呼び出し成功",
+            edgeFileShareResponse
+          );
         }
       } catch (error) {
         console.error("メッセージチャンネルイベントエラー:", error);
