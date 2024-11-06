@@ -1,3 +1,12 @@
+---
+name: Bug report
+about: バグ報告
+title: "Bug\U0001F41B: <Title>"
+labels: ''
+assignees: ''
+
+---
+
 # 概要
 <!-- 発生している問題やバグの概要を記述 -->
 

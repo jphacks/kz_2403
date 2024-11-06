@@ -1,3 +1,12 @@
+---
+name: Refactor request
+about: 軽微な改善や修正
+title: ''
+labels: ''
+assignees: ''
+
+---
+
 # 概要
 <!-- 修正または改善したい内容の概要を記述 -->
 

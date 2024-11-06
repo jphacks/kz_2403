@@ -1,3 +1,12 @@
+---
+name: Feature request
+about: 新機能のアイデア
+title: 'Feat✨: <Title>'
+labels: ''
+assignees: ''
+
+---
+
 # 概要
 <!-- 新しい機能や改善したい機能の概要を記述 -->
 
