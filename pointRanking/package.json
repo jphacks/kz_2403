@@ -3,8 +3,9 @@
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
-    "build": "npx tsc",
-    "build:watch": "npx tsc --watch"
+    "start": "node dist/src/server.js",
+    "dev": "ts-node src/server.ts",
+    "build": "tsc"
   },
   "license": "ISC",
   "devDependencies": {
