@@ -4,6 +4,7 @@ import { useSupabase } from "./hooks/useSupabase";
 import monthRankingCommand from "./commands/monthRankingCommand";
 import totalPointsCommand from "./commands/totalPointsCommand";
 import myPointsCommand from "./commands/myPointsCommand";
+import decorateCommand from "./commands/decorateCommand";
 
 const { slackBot, PORT } = useSlackbot();
 const { supabase } = useSupabase();
@@ -12,6 +13,7 @@ const { supabase } = useSupabase();
 monthRankingCommand(slackBot, supabase);
 totalPointsCommand(slackBot, supabase);
 myPointsCommand(slackBot, supabase);
+decorateCommand(slackBot);
 
 // アプリの起動
 (async () => {
