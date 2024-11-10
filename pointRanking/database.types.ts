@@ -255,7 +255,7 @@ export type Database = {
             referencedColumns: ["workspace_id"]
           },
           {
-            foreignKeyName: "MessageNew_workspace_id_message_user_id_fkey"
+            foreignKeyName: "MessageNew_workspace_id_user_id_fkey"
             columns: ["workspace_id", "user_id"]
             isOneToOne: false
             referencedRelation: "UserNew"
@@ -488,6 +488,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "UserNew"
             referencedColumns: ["user_id", "workspace_id"]
+          },
+          {
+            foreignKeyName: "Remind_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "WorkspaceNew"
+            referencedColumns: ["workspace_id"]
           },
         ]
       }
