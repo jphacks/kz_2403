@@ -8,7 +8,7 @@ import { handleReactionAdded } from "./handlers/reactionAddedHandler";
 import { handleMessageEvent } from "./handlers/messageHandler";
 
 (async () => {
-  const { slackBot, PORT } = await useSlackbot();
+  const { slackBot, PORT, workspaceId } = await useSlackbot();
   const { supabase, serviceRoleKey } = useSupabase();
 
   // コマンドの登録
@@ -19,11 +19,11 @@ import { handleMessageEvent } from "./handlers/messageHandler";
 
   // イベントハンドラーの登録
   slackBot.event("reaction_added", async ({ event, client }) => {
-    await handleReactionAdded(event, client, serviceRoleKey);
+    await handleReactionAdded(event, client, serviceRoleKey, workspaceId);
   });
 
-  slackBot.event("message", async ({ event, client }) => {
-    await handleMessageEvent(event, client, serviceRoleKey);
+  slackBot.event("message", async ({ event }) => {
+    await handleMessageEvent(event, serviceRoleKey, workspaceId);
   });
 
   // サーバーの起動
