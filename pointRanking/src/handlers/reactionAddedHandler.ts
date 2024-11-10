@@ -9,7 +9,8 @@ import { saveReactionData } from "../saveReactionData";
 export const handleReactionAdded = async (
   event: any,
   client: any,
-  serviceRoleKey: string
+  serviceRoleKey: string,
+  workspaceId: string
 ) => {
   const { reaction, user, item } = event;
     const messageId = item.ts;
@@ -36,7 +37,7 @@ export const handleReactionAdded = async (
       messageText: messageText || "メッセージなし",
       messageUserId,
       channelId,
-      reactionUserId,
+      workspaceId,
       reactionId: `${messageId}-${reactionUserId}-${emojiId}`,
       emojiId,
       emojiName,
@@ -46,7 +47,7 @@ export const handleReactionAdded = async (
 
     try {
       // 既にリアクションをつけているかどうかをチェック
-      const hasReacted = await hasUserReactedBefore(messageId, reactionUserId);
+      const hasReacted = await hasUserReactedBefore(messageId, reactionUserId, workspaceId);
       console.log(`Debug - hasReacted:`, JSON.stringify(hasReacted));
 
       if (hasReacted.hasReacted) {

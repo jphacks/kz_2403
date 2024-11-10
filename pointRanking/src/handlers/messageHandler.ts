@@ -16,8 +16,8 @@ interface MessageEvent {
 
 export const handleMessageEvent= async (
   event: any,
-  client: any,
-  serviceRoleKey: string
+  serviceRoleKey: string,
+  workspaceId: string,
 ) => {
   const { user, ts, channel_type, files } = event;
   const messageId = ts;
@@ -27,8 +27,9 @@ export const handleMessageEvent= async (
   // メッセージデータを保存
   const isMessageSaved = await saveMessageData({
     messageId,
+    workspaceId,
     messageText: event.text,
-    messageUserId,
+    userId: messageUserId,
     channelId,
   });
 
