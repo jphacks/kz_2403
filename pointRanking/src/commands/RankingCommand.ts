@@ -1,4 +1,3 @@
-// src/commands/rankingCommand.ts
 import { SlackCommandMiddlewareArgs, ViewSubmitAction, SlackViewMiddlewareArgs } from "@slack/bolt";
 import monthRankingCommand from "./monthRankingCommand";
 import totalPointsCommand from "./totalPointsCommand";
