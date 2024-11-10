@@ -1,8 +1,7 @@
-// 指定された絵文字が存在するかどうかを確認し、存在しない場合はEmojiテーブルに挿入する関数
-
 import { useSupabase } from "./hooks/useSupabase";
 
 export const ensureEmojiExists = async (
+  workspaceId: string,
   emojiId: string,
   emojiName: string
 ): Promise<void> => {
@@ -11,6 +10,7 @@ export const ensureEmojiExists = async (
   const { error } = await supabase
     .from("Emoji")
     .select("emoji_id")
+    .eq("workspace_id", workspaceId)
     .eq("emoji_id", emojiId)
     .single();
 
@@ -18,7 +18,7 @@ export const ensureEmojiExists = async (
   if (error && error.code === "PGRST116") {
     const { error: insertError } = await supabase
       .from("Emoji")
-      .insert([{ emoji_id: emojiId, emoji_name: emojiName }]);
+      .insert([{ workspace_id: workspaceId, emoji_id: emojiId, emoji_name: emojiName }]);
 
     if (insertError) {
       console.error("Emojiテーブルの挿入エラー:", insertError);
