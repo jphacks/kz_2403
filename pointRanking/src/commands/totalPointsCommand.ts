@@ -5,22 +5,23 @@ export default function totalPointsCommand(slackBot: any, supabase: any) {
   slackBot.command("/totalpoints", async ({ command, ack }: SlackCommandMiddlewareArgs) => {
     try {
       await ack();
-      handleTotalPoints(command.response_url).catch(console.error);
+      handleTotalPoints(command.response_url, command.team_id).catch(console.error);
     } catch (error) {
       console.error("ackのエラー:", error);
     }
   });
 
-  const handleTotalPoints = async (channelId: string) => {
+  const handleTotalPoints = async (channelId: string, workspaceId: string) => {
     try {
       const { data: pointsData, error: pointsError } = await supabase
-        .from("User")
-        .select("user_id, user_name, total_point")
+        .from("UserNew")
+        .select("user_id, workspace_id, user_name, total_point")
+        .eq("workspace_id", workspaceId)
         .order("total_point", { ascending: false })
         .limit(10);
 
       if (pointsError) {
-        throw new Error("Userテーブルの取得に失敗しました");
+        throw new Error("UserNewテーブルの取得に失敗しました");
       }
 
       const pointsBlocks = pointsData.map((entry: any, index: number) => {
