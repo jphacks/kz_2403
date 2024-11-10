@@ -82,22 +82,28 @@ export default function rankingCommand(slackBot: any, supabase: any) {
 
     const selectedValue = view.state.values.ranking_type.ranking_type.selected_option?.value;
     const channelId = channelMap.get(body.user.id);
+    const workspaceId = body.team?.id;
 
     if (!channelId) {
       console.error("チャンネルIDが見つかりません");
       return;
     }
 
+    if (!workspaceId) {
+      console.error("ワークスペースIDが見つかりません");
+      return;
+    }
+
     try {
       switch (selectedValue) {
         case "monthly":
-          await handleMonthRanking(channelId);
+          await handleMonthRanking(channelId, workspaceId);
           break;
         case "total":
-          await handleTotalPoints(channelId);
+          await handleTotalPoints(channelId, workspaceId);
           break;
         case "my":
-          await handleMyPoints(channelId, body.user.id);
+          await handleMyPoints(channelId, body.user.id, workspaceId);
           break;
       }
       
