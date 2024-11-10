@@ -5,6 +5,7 @@ import { WebClient } from "@slack/web-api";
 type WorkspaceData = {
   slack_bot_token: string;
   slack_signing_token: string;
+  workspace_id: string;
 };
 
 async function getWorkspaceConfig() {
@@ -13,7 +14,7 @@ async function getWorkspaceConfig() {
     // WorkSpaceNewテーブルからデータを取得
     const { data, error } = await supabase
       .from("WorkspaceNew")
-      .select("slack_bot_token, slack_signing_token")
+      .select("slack_bot_token, slack_signing_token, workspace_id")
       .single<WorkspaceData>();
 
     if (error) {
@@ -29,6 +30,7 @@ async function getWorkspaceConfig() {
     return {
       slack_bot_token: data.slack_bot_token,
       slack_signing_secret: data.slack_signing_token,
+      workspace_id: data.workspace_id
     };
   } catch (error) {
     if (error instanceof Error) {
@@ -48,7 +50,8 @@ export const useSlackbot = async () => {
   }
 
   let botToken = config.slack_bot_token;
-  let signingSecret = config.slack_signing_secret
+  let signingSecret = config.slack_signing_secret;
+  let workspaceId = config.workspace_id;
 
   // 環境変数や型ファイルを適用したクライアントを作成
   const slackBot = new App({
@@ -60,5 +63,5 @@ export const useSlackbot = async () => {
 
   const PORT = 3000;
 
-  return { slackBot, slackClient, PORT };
+  return { slackBot, slackClient, PORT, workspaceId };
   };
