@@ -1,4 +1,6 @@
+import { App } from "@slack/bolt";
 import { useSupabase } from "./useSupabase";
+import { WebClient } from "@slack/web-api";
 
 type WorkspaceData = {
   slack_bot_token: string;
@@ -45,8 +47,18 @@ export const useSlackbot = async () => {
     throw new Error("Slackbotの設定情報が不足しています");
   }
 
-  return {
-    botToken: config.slack_bot_token,
-    signingSecret: config.slack_signing_secret,
-  }
-};
+  let botToken = config.slack_bot_token;
+  let signingSecret = config.slack_signing_secret
+
+  // 環境変数や型ファイルを適用したクライアントを作成
+  const slackBot = new App({
+    token: botToken,
+    signingSecret: signingSecret,
+  });
+
+  const slackClient = new WebClient(botToken);
+
+  const PORT = 3000;
+
+  return { slackBot, slackClient, PORT };
+  };
