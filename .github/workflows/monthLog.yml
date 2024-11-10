@@ -1,0 +1,30 @@
+name: Monthly Database Report
+
+on:
+  schedule:
+    # 毎月1日の午前9時(UTC)に実行
+    - cron: '0 9 1 * *'
+  workflow_dispatch:
+
+jobs:
+  send-report:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - uses: actions/checkout@v5
+      
+      - name: Set up Python
+        uses: actions/setup-python@v3
+        with:
+          python-version: '3.12'
+          # cache: 'pip'
+      - run: |
+          pip install supabase slack-sdk pandas
+          
+      - name: Run report script
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_KEY: ${{ secrets.SUPABASE_KEY }}
+          SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
+          SLACK_CHANNEL_ID: ${{ secrets.SLACK_CHANNEL_ID }}
+        run: python scripts/generate_report.py
