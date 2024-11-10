@@ -18,23 +18,24 @@ export const saveReactionData = async (
     }
 
     // Emojiが存在することを確認
-    await ensureEmojiExists(payload.emojiId, payload.emojiName);
+    await ensureEmojiExists(payload.emojiId, payload.emojiName, payload.workspaceId);
 
     // リアクションを保存
     const { error: insertReactionError } = await supabase
-      .from("Reaction")
+      .from("ReactionNew")
       .insert([
         {
           reaction_id: payload.reactionId,
-          created_at: new Date().toISOString(),
+          workspace_id: payload.workspaceId,
           message_id: payload.messageId,
-          reaction_user_id: payload.reactionUserId,
+          user_id: payload.userId,
           emoji_id: payload.emojiId,
+          created_at: new Date().toISOString(),
         },
       ]);
 
     if (insertReactionError) {
-      console.error("Reactionテーブルの挿入エラー:", insertReactionError);
+      console.error("ReactionNewテーブルの挿入エラー:", insertReactionError);
       return false;
     }
     return true; // 挿入が成功した場合
