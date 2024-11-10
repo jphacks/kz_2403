@@ -666,21 +666,21 @@ export type Database = {
         Row: {
           created_at: string
           slack_bot_token: string | null
-          slack_singing_token: string | null
+          slack_signing_token: string | null
           updated_at: string
           workspace_id: string
         }
         Insert: {
           created_at?: string
           slack_bot_token?: string | null
-          slack_singing_token?: string | null
+          slack_signing_token?: string | null
           updated_at?: string
           workspace_id: string
         }
         Update: {
           created_at?: string
           slack_bot_token?: string | null
-          slack_singing_token?: string | null
+          slack_signing_token?: string | null
           updated_at?: string
           workspace_id?: string
         }
