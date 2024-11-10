@@ -5,63 +5,53 @@ export default function myPointsCommand(slackBot: any, supabase: any) {
   slackBot.command("/mypoints", async ({ command, ack }: SlackCommandMiddlewareArgs) => {
     try {
       await ack();
-      handleMyPoints(command, supabase).catch(console.error);
+      handleMyPoints(command.response_url, command.user_id).catch(console.error);
     } catch (error) {
       console.error("ackのエラー:", error);
     }
   });
-}
 
-async function handleMyPoints(command: SlackCommandMiddlewareArgs["command"], supabase: any) {
-  try {
-    const userId = command.user_id;
+  const handleMyPoints = async (channelId: string, userId: string) => {
+    try {
+      const { data: allUsersData, error: allUsersError } = await supabase
+        .from("User")
+        .select("user_id, user_name, total_point")
+        .order("total_point", { ascending: false });
 
-    const { data: allUsersData, error: allUsersError } = await supabase
-      .from("User")
-      .select("user_id, user_name, total_point")
-      .order("total_point", { ascending: false });
+      if (allUsersError) {
+        throw new Error("Userテーブルの取得に失敗しました");
+      }
 
-    if (allUsersError) {
-      console.error("Userテーブルの取得エラー:", allUsersError);
-      await axios.post(command.response_url, {
+      const userData = allUsersData.find((user: any) => user.user_id === userId);
+
+      if (!userData) {
+        throw new Error("ユーザーが見つかりません");
+      }
+
+      const userRank = allUsersData.findIndex((user: any) => user.user_id === userId) + 1;
+
+      const blocks = [
+        {
+          type: "section",
+          text: {
+            type: "mrkdwn",
+            text: `あなたのポイント\n*${userData.user_name}* : ${userData.total_point}pt\n順位: ${userRank}位`,
+          },
+        },
+      ];
+
+      await axios.post(channelId, {
+        blocks,
+        response_type: "ephemeral",
+      });
+    } catch (error) {
+      console.error("ユーザーポイント取得エラー:", error);
+      await axios.post(channelId, {
         text: "データの取得に失敗しました",
         response_type: "ephemeral",
       });
-      return;
     }
+  };
 
-    const userData = allUsersData.find((user: any) => user.user_id === userId);
-
-    if (!userData) {
-      console.error("ユーザーが見つかりません");
-      await axios.post(command.response_url, {
-        text: "ユーザーが見つかりません",
-        response_type: "ephemeral",
-      });
-      return;
-    }
-
-    const userRank = allUsersData.findIndex((user: any) => user.user_id === userId) + 1;
-
-    const blocks = [
-      {
-        type: "section",
-        text: {
-          type: "mrkdwn",
-          text: `あなたのポイント\n*${userData.user_name}* : ${userData.total_point}pt\n順位: ${userRank}位`,
-        },
-      },
-    ];
-
-    await axios.post(command.response_url, {
-      blocks,
-      response_type: "ephemeral",
-    });
-  } catch (error) {
-    console.error("ユーザーポイント取得エラー:", error);
-    await axios.post(command.response_url, {
-      text: "データの取得に失敗しました",
-      response_type: "ephemeral",
-    });
-  }
+  return { handleMyPoints };
 }
