@@ -1,11 +1,8 @@
 import { serve } from "https://deno.land/std/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
-// DenoでuseSupabaseが使えない為、環墫変数を直接読み込む
 const supabaseUrl = Deno.env.get("SUPABASE_URL") || "";
 const supabaseServiceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") || "";
-
-// Supabaseのクライアントを作成
 const supabase = createClient(supabaseUrl, supabaseServiceRoleKey);
 
 if (!supabaseUrl || !supabaseServiceRoleKey) {
@@ -25,14 +22,25 @@ serve(async (req) => {
 
     const requestJson = await req.json();
     console.log("受信したリクエスト:", requestJson);
+    const { messageId, userId, workspaceId } = requestJson;
 
-    const { messageId, userId } = requestJson;
+    if (!messageId || !userId || !workspaceId) {
+      console.error("必要なパラメータが不足しています");
+      return new Response(
+        JSON.stringify({ error: "messageId, userId, workspaceIdは必須です" }),
+        {
+          status: 400,
+          headers: { "Access-Control-Allow-Origin": "*" },
+        }
+      );
+    }
 
     // リアクションの順番に応じたポイント付与
     const { data: reactions, error: reactionError } = await supabase
       .from("ReactionNew")
       .select("created_at, user_id")
       .eq("message_id", messageId)
+      .eq("workspace_id", workspaceId)
       .order("created_at", { ascending: true });
 
     if (reactionError) {
@@ -43,36 +51,40 @@ serve(async (req) => {
       });
     }
 
-    console.log("リアクション取得結果:", reactions);
+    console.log("取得したリアクション一覧:", reactions);
 
-    let points = 0;
-    let reactionIndex = -1;
+    // リアクションの順番を確認
+    const userReactionIndex = reactions.findIndex(
+      (reaction) => reaction.user_id === userId
+    );
 
-    // リアクションの順番に基づいてポイントを設定
-    if (reactions.length > 0) {
-      reactionIndex = reactions.findIndex(
-        (reaction) => reaction.user_id === userId
-      );
+    console.log(`ユーザー${userId}のリアクション順位: ${userReactionIndex + 1}`);
 
-      if (reactionIndex === 0) {
-        points = 3;
-      } else if (reactionIndex === 1) {
-        points = 2;
-      } else {
-        points = 1;
-      }
+    // リアクション順位に応じたポイントを設定（明示的な条件分岐）
+    let points;
+    if (userReactionIndex === 0) {
+      points = 3;  // 1番目
+      console.log("最速リアクション: 3ポイント付与");
+    } else if (userReactionIndex === 1) {
+      points = 2;  // 2番目
+      console.log("2番目のリアクション: 2ポイント付与");
+    } else if (userReactionIndex >= 2) {
+      points = 1;  // 3番目以降
+      console.log("3番目以降のリアクション: 1ポイント付与");
+    } else {
+      points = 0;  // リアクションが見つからない場合
+      console.log("リアクションが見つかりません");
     }
 
-    console.log(
-      `リアクションの順番: ${reactionIndex + 1}, 付与ポイント: ${points}`
-    );
+    console.log(`付与するポイント: ${points}`);
 
     // 現在のtotal_pointを取得して加算
     const { data: user, error: userError } = await supabase
       .from("UserNew")
       .select("total_point")
       .eq("user_id", userId)
-      .single();
+      .eq("workspace_id", workspaceId)
+      .maybeSingle();
 
     if (userError) {
       console.error("Userテーブルの取得エラー:", userError);
@@ -93,7 +105,8 @@ serve(async (req) => {
     const { error: updateError } = await supabase
       .from("UserNew")
       .update({ total_point: newTotalPoints })
-      .eq("user_id", userId);
+      .eq("user_id", userId)
+      .eq("workspace_id", workspaceId);
 
     if (updateError) {
       console.error("ポイント更新エラー:", updateError);
@@ -110,7 +123,7 @@ serve(async (req) => {
     return new Response(
       JSON.stringify({
         message: "ポイント付与成功",
-        reactionIndex: reactionIndex + 1,
+        reactionIndex: userReactionIndex + 1,
         points,
         newTotalPoints,
       }),
@@ -121,7 +134,7 @@ serve(async (req) => {
     );
   } catch (error) {
     console.error("エッジファンクションのエラー:", error);
-    return new Response(JSON.stringify({ error: error }), {
+    return new Response(JSON.stringify({ error: error.message }), {
       status: 500,
       headers: { "Access-Control-Allow-Origin": "*" },
     });
