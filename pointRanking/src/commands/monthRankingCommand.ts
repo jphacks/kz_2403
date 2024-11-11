@@ -18,10 +18,10 @@ export default function monthRankingCommand(slackBot: any, supabase: any) {
 
       const { data: rankingData, error: rankingError } = await supabase
         .from("MonthLogNew")
-        .select("user_id, workspace_id, month_total_point")
+        .select("user_id, workspace_id, month_add_point")
         .eq("result_month", currentMonth)
         .eq("workspace_id", workspaceId)
-        .order("month_total_point", { ascending: false })
+        .order("month_add_point", { ascending: false })
         .limit(10);
 
       if (rankingError) {
