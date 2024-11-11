@@ -311,27 +311,27 @@ export type Database = {
       MonthLogNew: {
         Row: {
           created_at: string
-          month_total_point: number
-          month_year: number
+          month_add_point: number
           updated_at: string
           user_id: string
           workspace_id: string
+          year_month: number
         }
         Insert: {
           created_at?: string
-          month_total_point?: number
-          month_year?: number
+          month_add_point?: number
           updated_at?: string
           user_id: string
           workspace_id: string
+          year_month?: number
         }
         Update: {
           created_at?: string
-          month_total_point?: number
-          month_year?: number
+          month_add_point?: number
           updated_at?: string
           user_id?: string
           workspace_id?: string
+          year_month?: number
         }
         Relationships: [
           {
@@ -667,6 +667,7 @@ export type Database = {
           created_at: string
           slack_bot_token: string | null
           slack_signing_token: string | null
+          SLACK_WEBHOOK_URL: string | null
           updated_at: string
           workspace_id: string
         }
@@ -674,6 +675,7 @@ export type Database = {
           created_at?: string
           slack_bot_token?: string | null
           slack_signing_token?: string | null
+          SLACK_WEBHOOK_URL?: string | null
           updated_at?: string
           workspace_id: string
         }
@@ -681,6 +683,7 @@ export type Database = {
           created_at?: string
           slack_bot_token?: string | null
           slack_signing_token?: string | null
+          SLACK_WEBHOOK_URL?: string | null
           updated_at?: string
           workspace_id?: string
         }
