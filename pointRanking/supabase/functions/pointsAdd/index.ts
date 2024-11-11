@@ -26,12 +26,12 @@ serve(async (req) => {
     const requestJson = await req.json();
     console.log("受信したリクエスト:", requestJson);
 
-    const { messageId, reactionUserId } = requestJson;
+    const { messageId, userId } = requestJson;
 
     // リアクションの順番に応じたポイント付与
     const { data: reactions, error: reactionError } = await supabase
-      .from("Reaction")
-      .select("created_at, reaction_user_id")
+      .from("ReactionNew")
+      .select("created_at, user_id")
       .eq("message_id", messageId)
       .order("created_at", { ascending: true });
 
@@ -51,7 +51,7 @@ serve(async (req) => {
     // リアクションの順番に基づいてポイントを設定
     if (reactions.length > 0) {
       reactionIndex = reactions.findIndex(
-        (reaction) => reaction.reaction_user_id === reactionUserId
+        (reaction) => reaction.user_id === userId
       );
 
       if (reactionIndex === 0) {
@@ -69,9 +69,9 @@ serve(async (req) => {
 
     // 現在のtotal_pointを取得して加算
     const { data: user, error: userError } = await supabase
-      .from("User")
+      .from("UserNew")
       .select("total_point")
-      .eq("user_id", reactionUserId)
+      .eq("user_id", userId)
       .single();
 
     if (userError) {
@@ -91,9 +91,9 @@ serve(async (req) => {
 
     // 更新処理
     const { error: updateError } = await supabase
-      .from("User")
+      .from("UserNew")
       .update({ total_point: newTotalPoints })
-      .eq("user_id", reactionUserId);
+      .eq("user_id", userId);
 
     if (updateError) {
       console.error("ポイント更新エラー:", updateError);
@@ -104,7 +104,7 @@ serve(async (req) => {
     }
 
     console.log(
-      `ユーザーID: ${reactionUserId} に ${points} ポイントを加算し、total_pointを更新しました`
+      `ユーザーID: ${userId} に ${points} ポイントを加算し、total_pointを更新しました`
     );
 
     return new Response(

@@ -27,10 +27,10 @@ serve(async (req) => {
 
     // SupabaseのMonthLogテーブルからポイントランキングを取得
     const { data: rankingData, error } = await supabase
-      .from("MonthLog")
-      .select("user_id, month_total_point")
+      .from("MonthLogNew")
+      .select("user_id, month_add_point")
       .eq("result_month", `${currentMonth}-01`) // 正しい日付形式に修正
-      .order("month_total_point", { ascending: false })
+      .order("month_add_point", { ascending: false })
       .limit(10);
 
     if (error) {
@@ -50,7 +50,7 @@ serve(async (req) => {
     // ユーザー名を取得するためにUserテーブルを参照
     const userIds = rankingData.map((entry) => entry.user_id);
     const { data: usersData, error: usersError } = await supabase
-      .from("User")
+      .from("UserNew")
       .select("user_id, user_name")
       .in("user_id", userIds);
 
@@ -84,7 +84,7 @@ serve(async (req) => {
     const rankingText = rankingData
       .map((entry, index) => {
         const userName = userIdToName[entry.user_id] || "unknown";
-        return `${index + 1}位: ${userName} : ${entry.month_total_point}pt`;
+        return `${index + 1}位: ${userName} : ${entry.month_add_point}pt`;
       })
       .join("\n");
 

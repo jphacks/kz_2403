@@ -7,7 +7,7 @@ import type { PostgrestError } from "https://esm.sh/@supabase/supabase-js@2";
 
 interface Message {
   message_text: string;
-  message_user_id: string;
+  user_id: string;
 }
 
 interface User {
@@ -65,8 +65,8 @@ serve(async (req) => {
 
     // メッセージの取得
     const { data: messageData, error: messageError } = await supabase
-      .from("Message")
-      .select("message_text, message_user_id")
+      .from("MessageNew")
+      .select("message_text, user_id")
       .eq("message_id", messageId)
       .single();
 
@@ -86,13 +86,13 @@ serve(async (req) => {
     }
 
     const messageText = (messageData as Message).message_text;
-    const userId = messageData.message_user_id;
+    const userId = messageData.user_id;
     const hasMention = mentionRegex.test(messageText);
 
     if (hasMention) {
       // ユーザーの現在のtotal_pointを取得
       const { data: userData, error: userError } = await supabase
-        .from("User")
+        .from("UserNew")
         .select("total_point")
         .eq("user_id", userId)
         .single();
