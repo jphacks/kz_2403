@@ -14,9 +14,11 @@ client.on('messageCreate', async (message) => {
     if (message.author.bot)
         return;
     const mentionedUser = message.mentions.users.first();
+    const mentionAuthor = message.author;
     if (mentionedUser) {
         if (message.channel instanceof discord_js_1.TextChannel) {
             try {
+                const mentionAuthorDM = await mentionAuthor.send('まだ確認していません。メンションされたユーザーが確認するとお知らせします。');
                 const button = new discord_js_1.ButtonBuilder()
                     .setCustomId('primary')
                     .setLabel('確認しました！')
@@ -33,18 +35,7 @@ client.on('messageCreate', async (message) => {
                     catch (error) {
                         console.error('Failed to send message to the mentioned user:', error);
                     }
-                }, 1 * 60 * 1000);
-            }
-            catch (error) {
-                console.error('Error creating button:', error);
-            }
-            try {
-                const button = new discord_js_1.ButtonBuilder()
-                    .setCustomId('primary')
-                    .setLabel('確認しました！')
-                    .setStyle(discord_js_1.ButtonStyle.Primary)
-                    .setEmoji('🙇‍♂️');
-                const row = new discord_js_1.ActionRowBuilder().addComponents(button);
+                }, 1 * 30 * 1000);
                 setTimeout(async () => {
                     try {
                         await mentionedUser.send({
@@ -55,7 +46,7 @@ client.on('messageCreate', async (message) => {
                     catch (error) {
                         console.error('Failed to send message to the mentioned user:', error);
                     }
-                }, 2 * 60 * 1000);
+                }, 1 * 60 * 1000);
             }
             catch (error) {
                 console.error('Error creating button:', error);
@@ -69,10 +60,12 @@ client.on('interactionCreate', async (interaction) => {
     if (interaction.customId === 'primary') {
         try {
             await interaction.message.delete();
-            await interaction.reply({ content: 'メッセージを確認しました！', ephemeral: true });
+            const mentionAuthorDM = await interaction.user.send('確認しました！');
+            await mentionAuthorDM.delete();
+            await interaction.reply({ content: '確認ありがとう！', ephemeral: true });
         }
         catch (error) {
-            console.error('Failed to delete the message:', error);
+            console.error('Failed to delete the message or send confirmation:', error);
         }
     }
 });
