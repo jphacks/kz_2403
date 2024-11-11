@@ -38,6 +38,28 @@ client.on('messageCreate', async (message) => {
             catch (error) {
                 console.error('Error creating button:', error);
             }
+            try {
+                const button = new discord_js_1.ButtonBuilder()
+                    .setCustomId('primary')
+                    .setLabel('確認しました！')
+                    .setStyle(discord_js_1.ButtonStyle.Primary)
+                    .setEmoji('🙇‍♂️');
+                const row = new discord_js_1.ActionRowBuilder().addComponents(button);
+                setTimeout(async () => {
+                    try {
+                        await mentionedUser.send({
+                            content: `${mentionedUser.username}さん、はやくメッセージを確認してください！`,
+                            components: [row],
+                        });
+                    }
+                    catch (error) {
+                        console.error('Failed to send message to the mentioned user:', error);
+                    }
+                }, 2 * 60 * 1000);
+            }
+            catch (error) {
+                console.error('Error creating button:', error);
+            }
         }
     }
 });

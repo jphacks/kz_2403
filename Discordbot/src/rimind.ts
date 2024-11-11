@@ -31,7 +31,7 @@ client.on('messageCreate', async (message: Message) => {
         // ボタンを含むアクション行を作成
         const row = new ActionRowBuilder<ButtonBuilder>().addComponents(button);
 
-        // 5分後にメンションされたユーザーにDMでメッセージを送信
+        // メンションされたユーザーにDMでメッセージを送信
         setTimeout(async () => {
           try {
             await mentionedUser.send({
@@ -42,6 +42,32 @@ client.on('messageCreate', async (message: Message) => {
             console.error('Failed to send message to the mentioned user:', error);
           }
         }, 1 * 60 * 1000); // ここで何秒（ミリ秒）か指定
+      } catch (error) {
+        console.error('Error creating button:', error);
+      }
+
+      try {
+        // ボタンを作成
+        const button = new ButtonBuilder()
+          .setCustomId('primary')
+          .setLabel('確認しました！')
+          .setStyle(ButtonStyle.Primary)
+          .setEmoji('🙇‍♂️'); // 絵文字
+
+        // ボタンを含むアクション行を作成
+        const row = new ActionRowBuilder<ButtonBuilder>().addComponents(button);
+
+        // メンションされたユーザーにDMでメッセージを送信
+        setTimeout(async () => {
+          try {
+            await mentionedUser.send({
+              content: `${mentionedUser.username}さん、はやくメッセージを確認してください！`,
+              components: [row],
+            });
+          } catch (error) {
+            console.error('Failed to send message to the mentioned user:', error);
+          }
+        }, 2 * 60 * 1000); // ここで何秒（ミリ秒）か指定
       } catch (error) {
         console.error('Error creating button:', error);
       }
