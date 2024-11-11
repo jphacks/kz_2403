@@ -18,7 +18,7 @@ client.on('messageCreate', async (message) => {
     if (mentionedUser) {
         if (message.channel instanceof discord_js_1.TextChannel) {
             try {
-                const mentionAuthorDM = await mentionAuthor.send('まだ確認していません。メンションされたユーザーが確認するとお知らせします。');
+                const mentionAuthorDM = await mentionAuthor.send('まだメッセージを確認していません。メンションされたユーザーが確認するとお知らせします。');
                 const button = new discord_js_1.ButtonBuilder()
                     .setCustomId('primary')
                     .setLabel('確認しました！')
@@ -36,17 +36,6 @@ client.on('messageCreate', async (message) => {
                         console.error('Failed to send message to the mentioned user:', error);
                     }
                 }, 1 * 30 * 1000);
-                setTimeout(async () => {
-                    try {
-                        await mentionedUser.send({
-                            content: `${mentionedUser.username}さん、はやくメッセージを確認してください！`,
-                            components: [row],
-                        });
-                    }
-                    catch (error) {
-                        console.error('Failed to send message to the mentioned user:', error);
-                    }
-                }, 1 * 60 * 1000);
             }
             catch (error) {
                 console.error('Error creating button:', error);
@@ -60,8 +49,7 @@ client.on('interactionCreate', async (interaction) => {
     if (interaction.customId === 'primary') {
         try {
             await interaction.message.delete();
-            const mentionAuthorDM = await interaction.user.send('確認しました！');
-            await mentionAuthorDM.delete();
+            const mentionAuthorDM = await interaction.user.send('メンションしたユーザーがメッセージを確認しました！');
             await interaction.reply({ content: '確認ありがとう！', ephemeral: true });
         }
         catch (error) {

@@ -23,7 +23,7 @@ client.on('messageCreate', async (message: Message) => {
     if (message.channel instanceof TextChannel) {
       try {
         // メンションを行ったユーザーに「まだ確認していない」というDMを送信
-        const mentionAuthorDM = await mentionAuthor.send('まだ確認していません。メンションされたユーザーが確認するとお知らせします。');
+        const mentionAuthorDM = await mentionAuthor.send('まだメッセージを確認していません。メンションされたユーザーが確認するとお知らせします。');
 
         // ボタンを作成
         const button = new ButtonBuilder()
@@ -46,18 +46,6 @@ client.on('messageCreate', async (message: Message) => {
             console.error('Failed to send message to the mentioned user:', error);
           }
         }, 1 * 30 * 1000); // 30秒後にメッセージを送信
-
-        // 1分後に再度メンションされたユーザーにDMを送信
-        setTimeout(async () => {
-          try {
-            await mentionedUser.send({
-              content: `${mentionedUser.username}さん、はやくメッセージを確認してください！`,
-              components: [row],
-            });
-          } catch (error) {
-            console.error('Failed to send message to the mentioned user:', error);
-          }
-        }, 1 * 60 * 1000); // 1分後にメッセージを送信
       } catch (error) {
         console.error('Error creating button:', error);
       }
@@ -77,8 +65,7 @@ client.on('interactionCreate', async (interaction) => {
       await interaction.message.delete();
 
       // メンションを行ったユーザーへの「まだ確認していない」メッセージを削除
-      const mentionAuthorDM = await interaction.user.send('確認しました！');
-      await mentionAuthorDM.delete();  // 「まだ確認していない」メッセージを削除
+      const mentionAuthorDM = await interaction.user.send('メンションしたユーザーがメッセージを確認しました！');
 
       // ボタンを押したユーザーに確認メッセージを送信
       await interaction.reply({ content: '確認ありがとう！', ephemeral: true });
