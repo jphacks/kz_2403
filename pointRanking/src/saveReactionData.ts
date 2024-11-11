@@ -18,7 +18,11 @@ export const saveReactionData = async (
     }
 
     // Emojiが存在することを確認
-    await ensureEmojiExists(payload.emojiId, payload.emojiName, payload.workspaceId);
+    await ensureEmojiExists(
+      payload.workspaceId,
+      payload.emojiId,
+      payload.emojiName
+    );
 
     // リアクションを保存
     const { error: insertReactionError } = await supabase
