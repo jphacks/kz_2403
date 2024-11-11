@@ -1,20 +1,14 @@
 import { useSlackbot } from "./hooks/useSlackbot";
 import { useSupabase } from "./hooks/useSupabase";
-import monthRankingCommand from "./commands/monthRankingCommand";
-import totalPointsCommand from "./commands/totalPointsCommand";
-import myPointsCommand from "./commands/myPointsCommand";
-import decorateCommand from "./commands/decorateCommand";
-import { handleReactionAdded } from "./handlers/reactionAddedHandler";
-import { handleMessageEvent } from "./handlers/messageHandler";
+import { decorateCommand, rankingCommand } from "./commands";
+import { handleMessageEvent, handleReactionAdded } from "./handlers";
 
 (async () => {
   const { slackBot, PORT, workspaceId } = await useSlackbot();
   const { supabase, serviceRoleKey } = useSupabase();
 
   // コマンドの登録
-  monthRankingCommand(slackBot, supabase);
-  totalPointsCommand(slackBot, supabase);
-  myPointsCommand(slackBot, supabase);
+  rankingCommand(slackBot, supabase);
   decorateCommand(slackBot);
 
   // イベントハンドラーの登録

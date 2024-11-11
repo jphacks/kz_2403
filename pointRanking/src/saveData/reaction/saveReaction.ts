@@ -1,11 +1,10 @@
-import { ReactionData } from "./saveReaction";
-import { useSupabase } from "./hooks/useSupabase";
-import { ensureEmojiExists } from "./ensureEmojiExits";
+import { useSupabase } from "../../hooks/useSupabase";
+import { ensureEmojiExists, ensureMessageExists } from "../../utils";
+import { ReactionData } from "./reactionTypes";
 import "dotenv/config";
-import { ensureMessageExists } from "./ensureMessageExists";
 
-export const saveReactionData = async (
-  payload: ReactionData
+export const saveReaction = async (
+  payload: ReactionData,
 ): Promise<boolean> => {
   try {
     const { supabase } = useSupabase();
@@ -21,7 +20,7 @@ export const saveReactionData = async (
     await ensureEmojiExists(
       payload.workspaceId,
       payload.emojiId,
-      payload.emojiName
+      payload.emojiName,
     );
 
     // リアクションを保存

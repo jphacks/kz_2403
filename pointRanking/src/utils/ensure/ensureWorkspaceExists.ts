@@ -1,4 +1,4 @@
-import { useSupabase } from "./hooks/useSupabase";
+import { useSupabase } from "../../hooks/useSupabase";
 
 export const ensureWorkspaceExists = async (workspaceId: string): Promise<boolean> => {
   const { supabase } = useSupabase();

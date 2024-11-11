@@ -1,9 +1,9 @@
-import { useSupabase } from "./hooks/useSupabase";
+import { useSupabase } from "../../hooks/useSupabase";
 
-export const hasUserReactedBefore = async (
+export const ensureHasUserReactedBefore = async (
   messageId: string,
   userId: string,
-  workspaceId: string
+  workspaceId: string,
 ): Promise<{
   hasReacted: boolean;
   existingReaction?: any;

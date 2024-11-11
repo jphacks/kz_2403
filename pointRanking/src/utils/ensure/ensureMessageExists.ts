@@ -1,14 +1,17 @@
-import { useSupabase } from "./hooks/useSupabase";
+import { useSupabase } from "../../hooks/useSupabase";
 
 interface Payload {
   messageId: string;
-  workspaceId: string;
   messageText: string;
-  userId: string;
+  messageUserId: string;
   channelId: string;
+  userId: string;
+  workspaceId: string;
 }
 
-export const saveMessageData = async (payload: Payload): Promise<boolean> => {
+export const ensureMessageExists = async (
+  payload: Payload,
+): Promise<boolean> => {
   const { supabase } = useSupabase();
 
   // メッセージが存在するか確認
@@ -36,12 +39,12 @@ export const saveMessageData = async (payload: Payload): Promise<boolean> => {
       ]);
 
     if (insertMessageError) {
-      console.error("Messageテーブルの挿入エラー:", insertMessageError);
+      console.error("MessageNewテーブルの挿入エラー:", insertMessageError);
       return false;
     }
   } else if (selectError) {
     // その他のエラーの場合はログを出力
-    console.error("Messageテーブルの取得エラー:", selectError);
+    console.error("MessageNewテーブルの取得エラー:", selectError);
     return false;
   }
 

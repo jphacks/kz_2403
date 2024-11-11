@@ -1,5 +1,5 @@
+import { useSupabase } from "../../hooks/useSupabase";
 import { ensureWorkspaceExists } from "./ensureWorkspaceExists";
-import { useSupabase } from "./hooks/useSupabase";
 
 export const ensureEmojiExists = async (
   workspaceId: string,
