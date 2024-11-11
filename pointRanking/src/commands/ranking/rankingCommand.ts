@@ -3,7 +3,7 @@ import {
   SlackViewMiddlewareArgs,
   ViewSubmitAction,
 } from "@slack/bolt";
-import monthRankingCommand from "../monthRankingCommand";
+import monthRankingCommand from "./monthRankingCommand";
 import totalPointsCommand from "./totalPointsCommand";
 import myPointsCommand from "./myPointsCommand";
 
