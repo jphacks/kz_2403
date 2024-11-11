@@ -1,6 +1,5 @@
 
-import { callAddPointsEdgeFunction } from "../../edgeFunction";
-import { callAddTimedPointsEdgeFunction } from "../../edgeFunction/callAddTimedPointsEdgeFunction";
+import { callAddOrderPointsEdgeFunction, callAddTimedPointsEdgeFunction } from "../../edgeFunction";
 import { ReactionData, saveReaction } from "../../saveData";
 import { ensureHasUserReactedBefore, fetchMessageInfo, fetchUserInfo } from "../../utils";
 
@@ -17,15 +16,20 @@ export const handleReactionAdded = async (
   const emojiName = reaction;
   const emojiId = `emoji-${emojiName}`;
 
+  console.log("Debug - イベントを受信しました:", JSON.stringify(event));
+  console.log(`Debug - messageId: ${messageId}, channelId: ${channelId}, reactionUserId: ${reactionUserId}, emojiName: ${emojiName}`);
+
   // メッセージ情報の取得
   const { messageUserId, messageText } = await fetchMessageInfo(
     client,
     channelId,
     messageId,
   );
+  console.log("Debug - メッセージ情報を取得しました:", { messageUserId, messageText });
 
   // ユーザー情報の取得
   const userName = await fetchUserInfo(client, reactionUserId);
+  console.log("Debug - ユーザー情報を取得しました:", { userName });
 
   // ペイロードの作成
   const payload: ReactionData = {
@@ -42,6 +46,7 @@ export const handleReactionAdded = async (
     resultMonth: new Date().toISOString().slice(0, 7),
     points: 1,
   };
+  console.log("Debug - ペイロードを作成しました:", payload);
 
   try {
     // 既にリアクションをつけているかどうかをチェック
@@ -59,6 +64,7 @@ export const handleReactionAdded = async (
     } else {
       // リアクションデータを保存
       const isSaved = await saveReaction(payload);
+      console.log(`Debug - リアクションの保存結果: ${isSaved}`);
 
       if (!isSaved) {
         console.log("既に同じリアクションが存在するため、スキップします");
@@ -66,19 +72,23 @@ export const handleReactionAdded = async (
         console.log(
           "初めてのメッセージへのリアクションなので、ポイントを付与します",
         );
-        const edgeResponse = await callAddPointsEdgeFunction(
+        console.log("callAddOrderPointsEdgeFunctionを呼び出します");
+        const edgeResponse = await callAddOrderPointsEdgeFunction(
           serviceRoleKey,
           messageId,
           reactionUserId,
+          workspaceId
         );
+        console.log("Edge Function(callAddOrderPointsEdgeFunction)呼び出し成功:", edgeResponse);
+
+        console.log("callAddTimedPointsEdgeFunctionを呼び出します");
         const edgeTimedResponse = await callAddTimedPointsEdgeFunction(
           serviceRoleKey,
           messageId,
           reactionUserId,
         );
-        console.log("Edge Function呼び出し成功:", edgeResponse);
         console.log(
-          "Edge Function(addTimedPoints)の呼び出し成功",
+          "Edge Function(callAddTimedPointsEdgeFunction)の呼び出し成功",
           edgeTimedResponse,
         );
       }

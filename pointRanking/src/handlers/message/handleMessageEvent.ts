@@ -41,30 +41,33 @@ export const handleMessageEvent = async (
   // チャンネルに投稿されたメッセージだけを処理
   if (channel_type === "channel") {
     try {
+      // Edge Function（キーワードポイント）を呼び出し
+      console.log("callAddKeywordPointsEdgeFunctionを呼び出します");
       const edgeKeywordResponse = await callAddKeywordPointsEdgeFunction(
         serviceRoleKey,
         messageId,
         messageUserId,
       );
+      console.log("Edge Function（キーワードポイント）の呼び出し成功:", edgeKeywordResponse);
+
+      console.log("callAddMentionPointsEdgeFunctionを呼び出します");
       const edgeMentionResponse = await callAddMentionPointsEdgeFunction(
         serviceRoleKey,
         messageId,
         messageUserId,
       );
-      console.log("Edge Function呼び出し成功:", edgeKeywordResponse);
-      console.log(
-        "Edge Function(addMentionPoints)の呼び出し成功",
-        edgeMentionResponse,
-      );
+      console.log("Edge Function（メンションポイント）の呼び出し成功:", edgeMentionResponse);
+
       // ファイル共有のチェック
       if (files && files.length > 0) {
+        console.log("callAddFileSharePointsEdgeFunctionを呼び出します");
         const edgeFileShareResponse = await callAddFileSharePointsEdgeFunction(
           serviceRoleKey,
           messageId,
           messageUserId,
         );
         console.log(
-          "Edge Function(addFileSharePoints)の呼び出し成功",
+          "Edge Function（ファイル共有ポイント）の呼び出し成功:",
           edgeFileShareResponse,
         );
       }
