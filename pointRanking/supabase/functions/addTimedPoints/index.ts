@@ -50,10 +50,10 @@ serve(async (req) => {
 
     // リアクションのタイムスタンプを取得
     const { data: reactionData, error: reactionError } = await supabase
-      .from("Reaction")
+      .from("ReactionNew")
       .select("created_at")
       .eq("message_id", messageId)
-      .eq("reaction_user_id", reactionUserId)
+      .eq("user_id", reactionUserId)
       .single();
 
     if (reactionError || !reactionData) {
@@ -69,8 +69,8 @@ serve(async (req) => {
 
     // メッセージのタイムスタンプを取得
     const { data: messageData, error: messageError } = await supabase
-      .from("Message")
-      .select("created_at, message_user_id")
+      .from("MessageNew")
+      .select("created_at, user_id")
       .eq("message_id", messageId)
       .single();
 
@@ -108,9 +108,9 @@ serve(async (req) => {
     }
 
     // ユーザーの現在のtotal_pointを取得
-    const userId = messageData.message_user_id;
+    const userId = messageData.user_id;
     const { data: userData, error: userError } = await supabase
-      .from("User")
+      .from("UserNew")
       .select("total_point")
       .eq("user_id", userId)
       .single();
@@ -131,7 +131,7 @@ serve(async (req) => {
 
     // Userテーブルのtotal_pointを更新
     const { error: updateError } = await supabase
-      .from("User")
+      .from("UserNew")
       .update({ total_point: newTotalPoint })
       .eq("user_id", userId);
 

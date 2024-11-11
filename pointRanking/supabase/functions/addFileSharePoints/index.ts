@@ -50,8 +50,8 @@ serve(async (req) => {
 
     // メッセージの取得
     const { data: messageData, error: messageError } = await supabase
-      .from("Message")
-      .select("message_user_id")
+      .from("MessageNew")
+      .select("user_id")
       .eq("message_id", messageId)
       .single();
 
@@ -68,7 +68,7 @@ serve(async (req) => {
 
     // ユーザーの現在のtotal_pointを取得
     const { data: userData, error: userError } = await supabase
-      .from("User")
+      .from("UserNew")
       .select("total_point")
       .eq("user_id", userId)
       .single();
@@ -89,7 +89,7 @@ serve(async (req) => {
 
     // Userテーブルのtotal_pointを更新
     const { error: updateError } = await supabase
-      .from("User")
+      .from("UserNew")
       .update({ total_point: newTotalPoint })
       .eq("user_id", userId);
 
