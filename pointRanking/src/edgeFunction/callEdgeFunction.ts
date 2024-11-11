@@ -1,4 +1,4 @@
-import { buildEdgeUrl } from "../buildEdgeUrl";
+import { buildEdgeUrl } from "../utils/buildEdgeUrl";
 
 export const callEdgeFunction = async (
   pathKey: string,

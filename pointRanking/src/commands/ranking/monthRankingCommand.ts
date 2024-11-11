@@ -5,21 +5,23 @@ export default function monthRankingCommand(slackBot: any, supabase: any) {
   slackBot.command("/monthranking", async ({ command, ack }: SlackCommandMiddlewareArgs) => {
     try {
       await ack();
-      handleMonthRanking(command.response_url).catch(console.error);
+      const workspaceId = command.team_id;
+      handleMonthRanking(command.response_url, workspaceId).catch(console.error);
     } catch (error) {
       console.error("ackのエラー:", error);
     }
   });
 
-  const handleMonthRanking = async (channelId: string) => {
+  const handleMonthRanking = async (channelId: string, workspaceId: string) => {
     try {
       const currentMonth = new Date().toISOString().slice(0, 7) + "-01";
 
       const { data: rankingData, error: rankingError } = await supabase
-        .from("MonthLog")
-        .select("user_id, month_total_point")
+        .from("MonthLogNew")
+        .select("user_id, workspace_id, month_add_point")
         .eq("result_month", currentMonth)
-        .order("month_total_point", { ascending: false })
+        .eq("workspace_id", workspaceId)
+        .order("month_add_point", { ascending: false })
         .limit(10);
 
       if (rankingError) {
@@ -28,12 +30,13 @@ export default function monthRankingCommand(slackBot: any, supabase: any) {
 
       const userIds = rankingData.map((entry: any) => entry.user_id);
       const { data: usersData, error: usersError } = await supabase
-        .from("User")
-        .select("user_id, user_name")
-        .in("user_id", userIds);
+        .from("UserNew")
+        .select("user_id, workspace_id, user_name")
+        .in("user_id", userIds)
+        .eq("work_space_id", workspaceId);
 
       if (usersError) {
-        throw new Error("Userテーブルの取得に失敗しました");
+        throw new Error("UserNewテーブルの取得に失敗しました");
       }
 
       const userIdToName: { [key: string]: string } = usersData.reduce(

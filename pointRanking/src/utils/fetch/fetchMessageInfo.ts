@@ -1,17 +1,17 @@
 import type { WebClient } from "@slack/web-api";
 
 export const fetchMessageInfo = async (
-  clinet: WebClient,
+  client: WebClient,
   channelId: string,
   messageId: string
 ) => {
   try {
     // メッセージを取得
-    const result = await clinet.conversations.history({
+    const result = await client.conversations.history({
       channel: channelId,
       latest: messageId,
       inclusive: true, //タイムスタンプがlatestのメッセージを含む
-      limit: 1,
+      limit: 1, // 最新の1件のみ取得
     });
 
     // メッセージが取得できた場合

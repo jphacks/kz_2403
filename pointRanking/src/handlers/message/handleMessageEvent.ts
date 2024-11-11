@@ -1,7 +1,7 @@
-import { callAddFileSharePointsEdgeFunction } from "../edgeFunction/callAddFileSharePointEdgeFunction";
-import { callAddKeywordPointsEdgeFunction } from "../edgeFunction/callAddKeywordPointsEdgeFunction";
-import { callAddMentionPointsEdgeFunction } from "../edgeFunction/callAddMentionPointsEdgeFunction";
-import { saveMessageData } from "../saveMessageData";
+import { callAddFileSharePointsEdgeFunction } from "../../edgeFunction";
+import { callAddKeywordPointsEdgeFunction } from "../../edgeFunction";
+import { callAddMentionPointsEdgeFunction } from "../../edgeFunction";
+import { saveMessage } from "../../saveData";
 
 interface MessageEvent {
   type: string;
@@ -14,10 +14,10 @@ interface MessageEvent {
   files?: Array<{ id: string; name: string; url_private: string }>;
 }
 
-export const handleMessageEvent= async (
+export const handleMessageEvent = async (
   event: any,
-  client: any,
-  serviceRoleKey: string
+  serviceRoleKey: string,
+  workspaceId: string,
 ) => {
   const { user, ts, channel_type, files } = event;
   const messageId = ts;
@@ -25,10 +25,11 @@ export const handleMessageEvent= async (
   const channelId = event.channel;
 
   // メッセージデータを保存
-  const isMessageSaved = await saveMessageData({
+  const isMessageSaved = await saveMessage({
     messageId,
+    workspaceId,
     messageText: event.text,
-    messageUserId,
+    userId: messageUserId,
     channelId,
   });
 
@@ -43,28 +44,28 @@ export const handleMessageEvent= async (
       const edgeKeywordResponse = await callAddKeywordPointsEdgeFunction(
         serviceRoleKey,
         messageId,
-        messageUserId
+        messageUserId,
       );
       const edgeMentionResponse = await callAddMentionPointsEdgeFunction(
         serviceRoleKey,
         messageId,
-        messageUserId
+        messageUserId,
       );
       console.log("Edge Function呼び出し成功:", edgeKeywordResponse);
       console.log(
         "Edge Function(addMentionPoints)の呼び出し成功",
-        edgeMentionResponse
+        edgeMentionResponse,
       );
       // ファイル共有のチェック
       if (files && files.length > 0) {
         const edgeFileShareResponse = await callAddFileSharePointsEdgeFunction(
           serviceRoleKey,
           messageId,
-          messageUserId
+          messageUserId,
         );
         console.log(
           "Edge Function(addFileSharePoints)の呼び出し成功",
-          edgeFileShareResponse
+          edgeFileShareResponse,
         );
       }
     } catch (error) {

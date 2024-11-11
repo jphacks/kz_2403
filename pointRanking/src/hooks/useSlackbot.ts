@@ -1,41 +1,67 @@
 import { App } from "@slack/bolt";
-import { load } from "ts-dotenv";
+import { useSupabase } from "./useSupabase";
 import { WebClient } from "@slack/web-api";
 
-const path = require("path");
-require("dotenv").config({ path: path.resolve(__dirname, "../../../.env") });
+type WorkspaceData = {
+  slack_bot_token: string;
+  slack_signing_token: string;
+  workspace_id: string;
+};
 
-const env = load({
-  SLACK_BOT_TOKEN: {
-    type: String,
-    default: process.env.SLACK_BOT_TOKEN || "",
-  },
-  SLACK_SIGNING_SECRET: {
-    type: String,
-    default: process.env.SLACK_SIGNING_SECRET || "",
-  },
-  PORT: {
-    type: Number,
-    default: process.env.PORT ? parseInt(process.env.PORT, 10) : 3000,
-  },
-});
+async function getWorkspaceConfig() {
+  try {
+    let { supabase } = useSupabase();
+    // WorkSpaceNewテーブルからデータを取得
+    const { data, error } = await supabase
+      .from("WorkspaceNew")
+      .select("slack_bot_token, slack_signing_token, workspace_id")
+      .single<WorkspaceData>();
 
-export const useSlackbot = () => {
-  if (!env.SLACK_BOT_TOKEN || !env.SLACK_SIGNING_SECRET) {
-    throw new Error(
-      "SLACK_BOT_TOKENかSLACK_SIGNING_SECRETの環境変数に問題あり!!"
-    );
+    if (error) {
+      throw new Error(
+        `Supabaseからのデータの取得に失敗しました: ${error.message}`
+      );
+    }
+
+    if (!data) {
+      throw new Error("WorkspaceNewテーブルにデータが存在しません");
+    }
+
+    return {
+      slack_bot_token: data.slack_bot_token,
+      slack_signing_secret: data.slack_signing_token,
+      workspace_id: data.workspace_id
+    };
+  } catch (error) {
+    if (error instanceof Error) {
+      throw new Error(
+        `ワークスペースの設定情報の取得に失敗しました: ${error.message}`
+      );
+    }
+    throw new Error(`ワークスペースの設定情報の取得に失敗しました`);
   }
+}
+
+export const useSlackbot = async () => {
+  const config = await getWorkspaceConfig();
+
+  if (!config.slack_bot_token || !config.slack_signing_secret) {
+    throw new Error("Slackbotの設定情報が不足しています");
+  }
+
+  let botToken = config.slack_bot_token;
+  let signingSecret = config.slack_signing_secret;
+  let workspaceId = config.workspace_id;
 
   // 環境変数や型ファイルを適用したクライアントを作成
   const slackBot = new App({
-    token: env.SLACK_BOT_TOKEN,
-    signingSecret: env.SLACK_SIGNING_SECRET,
+    token: botToken,
+    signingSecret: signingSecret,
   });
 
-  const slackClient = new WebClient(env.SLACK_BOT_TOKEN);
+  const slackClient = new WebClient(botToken);
 
-  const PORT = env.PORT;
+  const PORT = 3000;
 
-  return { slackBot, slackClient, PORT };
-};
+  return { slackBot, slackClient, PORT, workspaceId };
+  };

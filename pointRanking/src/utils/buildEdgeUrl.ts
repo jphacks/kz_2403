@@ -1,5 +1,4 @@
 // edge functionのURLを構築する関数
-
 const path = require("path");
 require("dotenv").config({ path: path.resolve(__dirname, "/../../.env") });
 

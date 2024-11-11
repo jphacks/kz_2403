@@ -1,8 +1,9 @@
-import { useSupabase } from "./hooks/useSupabase";
+import { useSupabase } from "../../hooks/useSupabase";
 
-export const hasUserReactedBefore = async (
+export const ensureHasUserReactedBefore = async (
   messageId: string,
-  reactionUserId: string
+  userId: string,
+  workspaceId: string,
 ): Promise<{
   hasReacted: boolean;
   existingReaction?: any;
@@ -11,10 +12,11 @@ export const hasUserReactedBefore = async (
     const { supabase } = useSupabase();
 
     const { data, error } = await supabase
-      .from("Reaction")
+      .from("ReactionNew")
       .select("*")
       .eq("message_id", messageId)
-      .eq("reaction_user_id", reactionUserId)
+      .eq("user_id", userId)
+      .eq("workspace_id", workspaceId)
       .maybeSingle();
 
     console.log("haseUserReactedBefore - data", data);

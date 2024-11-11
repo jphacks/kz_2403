@@ -1,44 +1,50 @@
-import { useSupabase } from "./hooks/useSupabase";
+import { useSupabase } from "../../hooks/useSupabase";
 
 interface Payload {
   messageId: string;
   messageText: string;
   messageUserId: string;
   channelId: string;
+  userId: string;
+  workspaceId: string;
 }
 
-export const saveMessageData = async (payload: Payload): Promise<boolean> => {
+export const ensureMessageExists = async (
+  payload: Payload,
+): Promise<boolean> => {
   const { supabase } = useSupabase();
 
   // メッセージが存在するか確認
   const { data: messageExists, error: selectError } = await supabase
-    .from("Message")
+    .from("MessageNew")
     .select("message_id")
     .eq("message_id", payload.messageId)
+    .eq("workspace_id", payload.workspaceId)
     .single();
 
   // PGRST116エラーの場合はメッセージが存在しないため、新しいメッセージを挿入
   if (selectError && selectError.code === "PGRST116") {
     const { error: insertMessageError } = await supabase
-      .from("Message")
+      .from("MessageNew")
       .insert([
         {
           message_id: payload.messageId,
-          created_at: new Date().toISOString(),
+          workspace_id: payload.workspaceId,
           message_text: payload.messageText,
-          message_user_id: payload.messageUserId,
-          channnel_id: payload.channelId,
-          update_at: new Date().toISOString(),
+          user_id: payload.userId,
+          channel_id: payload.channelId,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
         },
       ]);
 
     if (insertMessageError) {
-      console.error("Messageテーブルの挿入エラー:", insertMessageError);
+      console.error("MessageNewテーブルの挿入エラー:", insertMessageError);
       return false;
     }
   } else if (selectError) {
     // その他のエラーの場合はログを出力
-    console.error("Messageテーブルの取得エラー:", selectError);
+    console.error("MessageNewテーブルの取得エラー:", selectError);
     return false;
   }
 
