@@ -31,7 +31,7 @@ export const saveMessageData = async (payload: Payload): Promise<boolean> => {
           user_id: payload.userId,
           channel_id: payload.channelId,
           created_at: new Date().toISOString(),
-          update_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
         },
       ]);
 
