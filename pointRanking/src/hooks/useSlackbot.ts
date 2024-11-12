@@ -63,5 +63,5 @@ export const useSlackbot = async () => {
 
   const PORT = 3000;
 
-  return { slackBot, slackClient, PORT, workspaceId };
+  return { slackBot, botToken, slackClient, PORT, workspaceId };
   };
