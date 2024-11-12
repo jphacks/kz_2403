@@ -1,7 +1,8 @@
 import { SlackCommandMiddlewareArgs, ViewSubmitAction, SlackViewMiddlewareArgs } from "@slack/bolt";
+import { WebClient } from "@slack/web-api";
 
 interface ExtendedSlackCommandMiddlewareArgs extends SlackCommandMiddlewareArgs {
-  client: any;
+  client: WebClient;
 }
 
 const channelMap = new Map<string, string>();
