@@ -1,0 +1,5 @@
+現在は、package.json内のscriptsのstartとdebugの読み取るファイルを変更しながら実行している。
+Discord botに現在権限をすべて渡している状態のため注意（デメリットがあるのかはわからない）
+リアクション機能は、message.react('🤔')のように宣言するか、
+import { get } from 'node-emoji'を使い、const emoji = get(':smile:') ?? ''でemojiにリアクションを入れて宣言するかの2択
+ranking.tsのやつはランキング機能を仮に作ってみたもので、未完成です。
