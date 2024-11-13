@@ -3,8 +3,8 @@
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
-    "start": "node ./build/rimind.js",
-    "debug": "ts-node ./src/rimind.ts",
+    "start": "node ./build/remind.js",
+    "debug": "ts-node ./src/remind.ts",
     "compile": "tsc -p .",
     "compile:test": "tsc -p . --noEmit"
   },
@@ -14,6 +14,7 @@
   "description": "",
   "devDependencies": {
     "eslint": "^9.14.0",
+    "supabase": "^1.219.2",
     "ts-node": "^10.9.2",
     "typescript": "^5.6.3"
   },

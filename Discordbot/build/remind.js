@@ -18,13 +18,18 @@ client.on('messageCreate', async (message) => {
     if (mentionedUser) {
         if (message.channel instanceof discord_js_1.TextChannel) {
             try {
-                const mentionAuthorDM = await mentionAuthor.send('まだメッセージを確認していません。メンションされたユーザーが確認するとお知らせします。');
-                const button = new discord_js_1.ButtonBuilder()
-                    .setCustomId('primary')
+                const messageLink = `https://discord.com/channels/${message.guild?.id}/${message.channel.id}/${message.id}`;
+                await mentionAuthor.send(`まだメッセージを確認していません。メンションされたユーザーが確認するとお知らせします。`);
+                const buttonLink = new discord_js_1.ButtonBuilder()
+                    .setLabel(`メッセージを確認`)
+                    .setStyle(discord_js_1.ButtonStyle.Link)
+                    .setURL(messageLink);
+                const buttonConfirm = new discord_js_1.ButtonBuilder()
+                    .setCustomId('confirm')
                     .setLabel('確認しました！')
                     .setStyle(discord_js_1.ButtonStyle.Primary)
                     .setEmoji('👍');
-                const row = new discord_js_1.ActionRowBuilder().addComponents(button);
+                const row = new discord_js_1.ActionRowBuilder().addComponents(buttonLink, buttonConfirm);
                 setTimeout(async () => {
                     try {
                         await mentionedUser.send({
@@ -35,7 +40,7 @@ client.on('messageCreate', async (message) => {
                     catch (error) {
                         console.error('Failed to send message to the mentioned user:', error);
                     }
-                }, 1 * 30 * 1000);
+                }, 1 * 1000);
             }
             catch (error) {
                 console.error('Error creating button:', error);
@@ -46,14 +51,16 @@ client.on('messageCreate', async (message) => {
 client.on('interactionCreate', async (interaction) => {
     if (!interaction.isButton())
         return;
-    if (interaction.customId === 'primary') {
+    if (interaction.customId === 'confirm') {
+        const mentionAuthor = interaction.message?.mentions.users.first();
         try {
-            await interaction.message.delete();
-            const mentionAuthorDM = await interaction.user.send('メンションしたユーザーがメッセージを確認しました！');
             await interaction.reply({ content: '確認ありがとう！', ephemeral: true });
+            if (mentionAuthor) {
+                await mentionAuthor.send(`${interaction.user.username}さんがメッセージを確認しました。`);
+            }
         }
         catch (error) {
-            console.error('Failed to delete the message or send confirmation:', error);
+            console.error('Failed to send confirmation to the mention author:', error);
         }
     }
 });
