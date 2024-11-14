@@ -3,8 +3,8 @@
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
-    "start": "node ./build/remind.js",
-    "debug": "ts-node ./src/remind.ts",
+    "start": "node ./build/index.js",
+    "debug": "ts-node ./src/index.ts",
     "compile": "tsc -p .",
     "compile:test": "tsc -p . --noEmit"
   },
@@ -21,6 +21,7 @@
   "dependencies": {
     "discord.js": "^14.16.3",
     "dotenv": "^16.4.5",
+    "express": "^4.21.1",
     "node-emoji": "^2.1.3"
   }
 }
