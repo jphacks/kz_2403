@@ -6,9 +6,10 @@ import { buildVoteResultMessage } from "../utils/messageBuilder";
 export async function handleVote({
   ack,
   body,
-  action, 
+  action,
   client,
 }: SlackActionMiddlewareArgs<BlockAction> & { client: WebClient }) {
+  // 早めにackを呼び出す
   await ack();
 
   try {
@@ -18,31 +19,22 @@ export async function handleVote({
     const selectedOption = (action as any).text.text;
 
     if (!channelId || !messageTs) {
-      throw new Error('チャンネルIDまたはメッセージIDが見つかりません');
+      console.error('チャンネルIDまたはメッセージIDが見つかりません');
+      return;
     }
 
     // 投票データの取得
     let voteData = voteStore.get(messageTs);
-
-    // 初めての投票の場合、投票データを初期化
+    
+    // 投票データが存在しない場合の処理
     if (!voteData) {
-      const message = body.message;
-      if (!message?.blocks) {
-        throw new Error('メッセージデータが不正です');
-      }
-
-      // メッセージから投票オプションを取得
-      const options = message.blocks
-        .find((block: { type: string }) => block.type === 'actions')
-        ?.elements
-        ?.map((element: any) => (element as any).text.text) || [];
-
-      voteData = {
-        channelId,
-        options,
-        votes: new Map(),
-        endTime: Date.now() + 60 * 60 * 1000 // デフォルト1時間
-      };
+      console.error('投票データが見つかりません');
+      await client.chat.postEphemeral({
+        channel: channelId,
+        user: userId,
+        text: "申し訳ありません。この投票は既に終了しているか、データが見つかりません。"
+      });
+      return;
     }
 
     // 投票終了チェック
@@ -72,51 +64,37 @@ export async function handleVote({
     // 投票データを更新
     voteStore.set(messageTs, voteData);
 
-    // 投票結果を集計
-    const results = Array.from(voteData.votes.entries()).map(([option, voters]) => ({
-      option,
-      count: voters.size,
-      voters: Array.from(voters)
-    }));
+    // 結果を集計
+    const results = Array.from(voteData.votes.entries())
+      .map(([option, voters]) => ({
+        option,
+        count: voters.size,
+        voters: Array.from(voters)
+      }));
 
     // メッセージを更新
-    const blocks = buildVoteResultMessage(
-      voteData,
-      body.message?.blocks?.[0]?.text?.text || '',
-      results
-    );
-
-    await client.chat.update({
-      channel: channelId,
-      ts: messageTs,
-      blocks,
-      text: `投票結果\n${results.map(r => `${r.option}: ${r.count}票`).join('\n')}`
-    });
-
-    // 全員が投票完了したかチェック
-    const totalVotes = results.reduce((sum, r) => sum + r.count, 0);
-    const message = await client.conversations.members({
-      channel: channelId
-    });
-
-    if (message.members && totalVotes >= message.members.length - 1) { // ボットを除く
-      // 全員投票完了
-      await client.chat.postMessage({
+    try {
+      await client.chat.update({
         channel: channelId,
-        thread_ts: messageTs,
-        text: "全員の投票が完了しました！"
+        ts: messageTs,
+        blocks: buildVoteResultMessage(voteData, body.message?.blocks?.[0]?.text?.text || '', results),
+        text: `投票結果\n${results.map(r => `${r.option}: ${r.count}票`).join('\n')}`
       });
-
-      // 投票を終了
-      voteData.endTime = Date.now();
-      voteStore.set(messageTs, voteData);
+    } catch (updateError) {
+      console.error('メッセージ更新エラー:', updateError);
     }
 
   } catch (error) {
     console.error('投票処理エラー:', error);
-    if (error instanceof Error) {
-      console.error('エラー詳細:', error.message);
-      console.error('スタックトレース:', error.stack);
+    // エラーが発生しても、ackは既に送信済みなのでSlackへの応答は保証される
+    try {
+      await client.chat.postEphemeral({
+        channel: body.channel?.id || '',
+        user: body.user.id,
+        text: "投票処理中にエラーが発生しました。しばらく待ってから再度お試しください。"
+      });
+    } catch (notifyError) {
+      console.error('エラー通知の送信に失敗:', notifyError);
     }
   }
 }
