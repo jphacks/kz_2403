@@ -1,7 +1,6 @@
 import { SlackViewMiddlewareArgs, ViewSubmitAction } from "@slack/bolt";
 import {
   buildVoteMessage,
-  buildVoteResultMessage,
 } from "../utils/messageBuilder";
 import { voteStore } from "../utils/voteStore";
 import { WebClient } from "@slack/web-api";
