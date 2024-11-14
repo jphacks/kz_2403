@@ -1,5 +1,8 @@
 import { SlackViewMiddlewareArgs, ViewSubmitAction } from "@slack/bolt";
-import { buildVoteMessage, buildVoteResultMessage } from "../utils/messageBuilder";
+import {
+  buildVoteMessage,
+  buildVoteResultMessage,
+} from "../utils/messageBuilder";
 import { voteStore } from "../utils/voteStore";
 import { WebClient } from "@slack/web-api";
 
@@ -13,9 +16,10 @@ export async function handleVoteModalSubmission({
   try {
     const metadata = JSON.parse(view.private_metadata);
     const channelId = metadata.channelId;
-    
+
     // 質問を取得
-    const questionValue = view.state.values.vote_question_block?.vote_question?.value;
+    const questionValue =
+      view.state.values.vote_question_block?.vote_question?.value;
     if (!questionValue) {
       throw new Error("質問が入力されていません");
     }
@@ -36,36 +40,25 @@ export async function handleVoteModalSubmission({
 
     // 現在時刻と比較
     if (endTimestamp <= Date.now()) {
-      throw new Error("終了日時が現在時刻より前です");
-    }
-
-    if (!channelId) {
-      throw new Error("チャンネルIDが見つかりません");
+      throw new Error("終了時刻は現在より後の時間を設定してください");
     }
 
     // 選択肢を取得
     const options: string[] = [];
     for (let i = 1; i <= metadata.optionCount; i++) {
-      const optionValue = view.state.values[`vote_option${i}_block`]?.[`vote_option${i}`]?.value;
+      const optionValue =
+        view.state.values[`vote_option${i}_block`]?.[`vote_option${i}`]?.value;
       if (optionValue?.trim()) {
         options.push(optionValue.trim());
       }
     }
 
-    if (options.length < 2) {
-      throw new Error("最低2つの選択肢が必要です");
-    }
-
     // 投票メッセージを投稿
     const message = await client.chat.postMessage({
       channel: channelId,
-      text: `*${question}*`,
+      text: question,
       blocks: buildVoteMessage(question, options, endTimestamp),
     });
-
-    if (!message.ts || typeof message.channel !== "string") {
-      throw new Error("メッセージの投稿に失敗しました");
-    }
 
     // 投票データを保存
     if (message.ts) {
@@ -81,17 +74,42 @@ export async function handleVoteModalSubmission({
         const voteData = message.ts ? voteStore.get(message.ts) : undefined;
         if (voteData) {
           // 結果を集計して投稿
-          const results = Array.from(voteData.votes.entries())
-            .map(([option, voters]) => ({
+          const results = Array.from(voteData.votes.entries()).map(
+            ([option, voters]) => ({
               option,
               count: voters.size,
-              voters: Array.from(voters)
-            }));
+              voters: Array.from(voters),
+            })
+          );
 
-          await client.chat.postMessage({
+          // メッセージを更新して結果のみを表示
+          await client.chat.update({
             channel: channelId,
-            text: "投票が終了しました",
-            blocks: buildVoteResultMessage(voteData, questionValue, results)
+            ts: message.ts as string,
+            text: "投票は終了しました",
+            blocks: [
+              {
+                type: "section",
+                text: {
+                  type: "mrkdwn",
+                  text: "*投票結果*\n" + question,
+                },
+              },
+              {
+                type: "section",
+                text: {
+                  type: "mrkdwn",
+                  text: results
+                    .map(
+                      (r, index) =>
+                        `${index === 0 ? "🏆 " : ""}${r.option}: ${
+                          r.count
+                        }票 (${r.voters.map((id) => `<@${id}>`).join(", ")})`
+                    )
+                    .join("\n"),
+                },
+              },
+            ],
           });
 
           // 投票データを削除
