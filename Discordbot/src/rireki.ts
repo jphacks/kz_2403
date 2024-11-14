@@ -1,5 +1,6 @@
 import { Client, GatewayIntentBits, Partials, Events, MessageReaction, PartialMessageReaction, User, PartialUser } from 'discord.js';
 import dotenv from 'dotenv';
+const emoji = require('node-emoji');
 
 dotenv.config();
 
@@ -25,7 +26,7 @@ client.on(Events.MessageReactionAdd, async (reaction: MessageReaction | PartialM
 	}
 
 	console.log(` ${user.tag}がリアクションを追加しました！`);
-	console.log(`Emoji: ${reaction.emoji.name}`);
+	console.log(emoji.which(`${reaction.emoji.name}`));
 });
 
 // リアクションが削除されたときのイベント
@@ -39,9 +40,9 @@ client.on(Events.MessageReactionRemove, async (reaction: MessageReaction | Parti
 			return;
 		}
 	}
-
+	
 	console.log(`${user.tag}がリアクションを削除しました!`);
-	console.log(`Emoji: ${reaction.emoji.name}`);
+	console.log(emoji.which(`${reaction.emoji.name}`));
 });
 
 client.login(process.env.DISCORD_TOKEN);

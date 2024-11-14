@@ -27,11 +27,12 @@ client.on('messageCreate', async (message) => {
                     .setStyle(discord_js_1.ButtonStyle.Link)
                     .setURL(messageLink);
                 const buttonConfirm = new discord_js_1.ButtonBuilder()
-                    .setCustomId(mentionAuthor.id)
+                    .setCustomId('confirm')
                     .setLabel('確認しました！')
                     .setStyle(discord_js_1.ButtonStyle.Primary)
                     .setEmoji('👍');
                 const row = new discord_js_1.ActionRowBuilder().addComponents(buttonLink, buttonConfirm);
+                setTimeout(async () => {
                     try {
                         await mentionedUser.send({
                             content: `${mentionedUser.username}さん、@ ${mentionAuthor.username}からメッセージが届いています。メッセージを確認してください!`,
@@ -41,6 +42,7 @@ client.on('messageCreate', async (message) => {
                     catch (error) {
                         console.error('Failed to send message to the mentioned user:', error);
                     }
+                }, 1 * 1000);
             }
             catch (error) {
                 console.error('Error creating button:', error);
@@ -48,11 +50,10 @@ client.on('messageCreate', async (message) => {
         }
     }
 });
-
 client.on('interactionCreate', async (interaction) => {
     if (!interaction.isButton())
         return;
-    // if (interaction.customId === 'confirm') {
+    if (interaction.customId === 'confirm') {
         interaction.message?.mentions.users.first();
         try {
             await interaction.reply({ content: '確認ありがとう！', ephemeral: true });
@@ -60,9 +61,8 @@ client.on('interactionCreate', async (interaction) => {
         catch (error) {
             console.error('Failed to send confirmation to the mention author:', error);
         }
-    // }
-    const mentionAuthor = await client.users.fetch(interaction.customId);
-    await mentionAuthor.send('メンションしたユーザーがメッセージを確認しました！');
+    }
+    await interaction.user.send('メンションしたユーザーがメッセージを確認しました！');
     await interaction.message.delete();
 });
 client.login(process.env.DISCORD_TOKEN);

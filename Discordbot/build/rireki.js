@@ -5,6 +5,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const discord_js_1 = require("discord.js");
 const dotenv_1 = __importDefault(require("dotenv"));
+const emoji = require('node-emoji');
 dotenv_1.default.config();
 const client = new discord_js_1.Client({
     intents: [discord_js_1.GatewayIntentBits.Guilds, discord_js_1.GatewayIntentBits.GuildMessages, discord_js_1.GatewayIntentBits.GuildMessageReactions],
@@ -24,7 +25,7 @@ client.on(discord_js_1.Events.MessageReactionAdd, async (reaction, user) => {
         }
     }
     console.log(` ${user.tag}がリアクションを追加しました！`);
-    console.log(`Emoji: ${reaction.emoji.name}`);
+    console.log(emoji.which(`${reaction.emoji.name}`));
 });
 client.on(discord_js_1.Events.MessageReactionRemove, async (reaction, user) => {
     if (reaction.partial) {
@@ -37,7 +38,7 @@ client.on(discord_js_1.Events.MessageReactionRemove, async (reaction, user) => {
         }
     }
     console.log(`${user.tag}がリアクションを削除しました!`);
-    console.log(`Emoji: ${reaction.emoji.name}`);
+    console.log(emoji.which(`${reaction.emoji.name}`));
 });
 client.login(process.env.DISCORD_TOKEN);
 
