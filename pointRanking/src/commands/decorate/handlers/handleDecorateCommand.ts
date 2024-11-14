@@ -65,6 +65,20 @@ export const handleDecorateCommand = async ({
                   },
                   value: "simple_decor",
                 },
+                {
+                  text: {
+                    type: "plain_text",
+                    text: "🌟 星囲み 🌟",
+                  },
+                  value: "star_border",
+                },
+                {
+                  text: {
+                    type: "plain_text",
+                    text: "💬 吹き出し 💬",
+                  },
+                  value: "speech_bubble",
+                },
               ],
             },
           },
