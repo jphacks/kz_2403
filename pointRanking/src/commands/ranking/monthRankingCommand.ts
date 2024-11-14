@@ -2,15 +2,20 @@ import { SlackCommandMiddlewareArgs } from "@slack/bolt";
 import axios from "axios";
 
 export default function monthRankingCommand(slackBot: any, supabase: any) {
-  slackBot.command("/monthranking", async ({ command, ack }: SlackCommandMiddlewareArgs) => {
-    try {
-      await ack();
-      const workspaceId = command.team_id;
-      handleMonthRanking(command.response_url, workspaceId).catch(console.error);
-    } catch (error) {
-      console.error("ackのエラー:", error);
+  slackBot.command(
+    "/monthranking",
+    async ({ command, ack }: SlackCommandMiddlewareArgs) => {
+      try {
+        await ack();
+        const workspaceId = command.team_id;
+        handleMonthRanking(command.response_url, workspaceId).catch(
+          console.error
+        );
+      } catch (error) {
+        console.error("ackのエラー:", error);
+      }
     }
-  });
+  );
 
   const handleMonthRanking = async (channelId: string, workspaceId: string) => {
     try {
@@ -40,7 +45,10 @@ export default function monthRankingCommand(slackBot: any, supabase: any) {
       }
 
       const userIdToName: { [key: string]: string } = usersData.reduce(
-        (acc: { [key: string]: string }, user: { user_id: string; user_name: string }) => {
+        (
+          acc: { [key: string]: string },
+          user: { user_id: string; user_name: string }
+        ) => {
           acc[user.user_id] = user.user_name;
           return acc;
         },
@@ -99,7 +107,7 @@ export default function monthRankingCommand(slackBot: any, supabase: any) {
         text: "データの取得に失敗しました",
         response_type: "in_channel",
       });
-  }
-}
+    }
+  };
   return { handleMonthRanking };
 }

@@ -44,12 +44,12 @@ export function buildVoteResultMessage(
   question: string,
   results: { option: string; count: number; voters: string[] }[]
 ): KnownBlock[] {
-  return [
+  const blocks: KnownBlock[] = [
     {
       type: "section",
       text: {
         type: "mrkdwn",
-        text: `*${question}*`,
+        text: `${question}`,
       },
     },
     {
@@ -57,22 +57,36 @@ export function buildVoteResultMessage(
       text: {
         type: "mrkdwn",
         text: results
-          .map((r) => `${r.option}: ${r.count}票 (${r.voters.length}人が投票)`)
+          .map(
+            (r, index) =>
+              `${r.option}: ${r.count}票 (${r.voters
+                .map((id) => `<@${id}>`)
+                .join(", ")})`
+          )
           .join("\n"),
       },
     },
     {
+      type: "divider",
+    },
+  ];
+
+  // 投票が終了していない場合はボタンを追加
+  if (Date.now() < voteData.endTime) {
+    blocks.push({
       type: "actions",
       block_id: "vote_actions",
-      elements: voteData.options.map((option) => ({
+      elements: voteData.options.map((option, index) => ({
         type: "button",
         text: {
           type: "plain_text",
           text: option,
         },
         value: option,
-        action_id: `vote_option_${option}`,
+        action_id: `vote_option_${index + 1}`,
       })),
-    },
-  ];
+    });
+  }
+
+  return blocks;
 }

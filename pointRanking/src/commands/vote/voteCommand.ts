@@ -10,13 +10,15 @@ import { handleOptionAddition } from "./handlers/optionHandler";
 import { handleVoteModalSubmission } from "./handlers/modalHandler";
 import { handleVote } from "./handlers/voteHandler";
 
-export default function voteCommand({
-  slackBot,
-}: SlackCommandProps) {
+export default function voteCommand({ slackBot }: SlackCommandProps) {
   // /vote コマンドハンドラー
   slackBot.command(
     "/vote",
-    async ({ command, ack, client }: SlackCommandMiddlewareArgs & { client: any }) => {
+    async ({
+      command,
+      ack,
+      client,
+    }: SlackCommandMiddlewareArgs & { client: any }) => {
       try {
         await ack();
 
@@ -156,7 +158,9 @@ export default function voteCommand({
   // 投票モーダル送信ハンドラー
   slackBot.view(
     "vote_modal",
-    async (args: SlackViewMiddlewareArgs<ViewSubmitAction> & { client: any }) => {
+    async (
+      args: SlackViewMiddlewareArgs<ViewSubmitAction> & { client: any }
+    ) => {
       await handleVoteModalSubmission(args);
     }
   );

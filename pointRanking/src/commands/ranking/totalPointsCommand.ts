@@ -2,14 +2,19 @@ import { SlackCommandMiddlewareArgs } from "@slack/bolt";
 import axios from "axios";
 
 export default function totalPointsCommand(slackBot: any, supabase: any) {
-  slackBot.command("/totalpoints", async ({ command, ack }: SlackCommandMiddlewareArgs) => {
-    try {
-      await ack();
-      handleTotalPoints(command.response_url, command.team_id).catch(console.error);
-    } catch (error) {
-      console.error("ackのエラー:", error);
+  slackBot.command(
+    "/totalpoints",
+    async ({ command, ack }: SlackCommandMiddlewareArgs) => {
+      try {
+        await ack();
+        handleTotalPoints(command.response_url, command.team_id).catch(
+          console.error
+        );
+      } catch (error) {
+        console.error("ackのエラー:", error);
+      }
     }
-  });
+  );
 
   const handleTotalPoints = async (channelId: string, workspaceId: string) => {
     try {
