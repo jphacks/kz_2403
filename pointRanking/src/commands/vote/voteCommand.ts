@@ -55,6 +55,40 @@ export default function voteCommand({
                   text: "質問",
                 },
               },
+              //日付選択
+              {
+                type: "input",
+                block_id: "end_date_block",
+                element: {
+                  type: "datepicker",
+                  action_id: "end_date",
+                  placeholder: {
+                    type: "plain_text",
+                    text: "終了日を選択",
+                  },
+                },
+                label: {
+                  type: "plain_text",
+                  text: "終了日",
+                },
+              },
+              // 時間選択
+              {
+                type: "input",
+                block_id: "end_time_block",
+                element: {
+                  type: "timepicker",
+                  action_id: "end_time",
+                  placeholder: {
+                    type: "plain_text",
+                    text: "終了時間を選択",
+                  },
+                },
+                label: {
+                  type: "plain_text",
+                  text: "終了時間",
+                },
+              },
               {
                 type: "input",
                 block_id: "vote_option1_block",

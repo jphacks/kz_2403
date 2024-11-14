@@ -2,7 +2,6 @@ import { BlockAction, SlackActionMiddlewareArgs } from "@slack/bolt";
 import { WebClient } from "@slack/web-api";
 import { voteStore } from "../utils/voteStore";
 import { buildVoteResultMessage } from "../utils/messageBuilder";
-import { VoteData } from "../types";
 
 export async function handleVote({
   ack,

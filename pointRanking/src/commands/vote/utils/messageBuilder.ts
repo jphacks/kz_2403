@@ -3,15 +3,21 @@ import { VoteData } from "../types";
 
 
 export function buildVoteMessage(question: string, options: string[], endTime: number): KnownBlock[] {
-  const remainingTime = Math.max(0, endTime - Date.now());
-  const remainingMinutes = Math.floor(remainingTime / (1000 * 60));
+  const endTimeDate = new Date(endTime);
+  const formattedEndTime = endTimeDate.toLocaleString('ja-JP', {
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit',
+  });
 
   return [
     {
       type: "section",
       text: {
         type: "mrkdwn",
-        text: `*${question}*\n残り時間: ${remainingMinutes}分`
+        text: `*${question}*\n終了時刻: ${formattedEndTime}`
       }
     },
     {
@@ -27,7 +33,7 @@ export function buildVoteMessage(question: string, options: string[], endTime: n
         action_id: `vote_option_${index + 1}`,
       }))
     }
-  ]
+  ];
 }
 
 export function buildVoteResultMessage(
