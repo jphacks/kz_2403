@@ -3,8 +3,8 @@
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
-    "start": "node ./build/index.js",
-    "debug": "ts-node ./src/index.ts",
+    "start": "node ./build/rireki.js",
+    "debug": "ts-node ./src/rireki.ts",
     "compile": "tsc -p .",
     "compile:test": "tsc -p . --noEmit"
   },
