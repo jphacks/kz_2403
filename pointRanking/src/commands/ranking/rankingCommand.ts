@@ -6,6 +6,7 @@ import {
 import monthRankingCommand from "./monthRankingCommand";
 import totalPointsCommand from "./totalPointsCommand";
 import myPointsCommand from "./myPointsCommand";
+import { WebClient } from "@slack/web-api";
 
 const channelMap = new Map<string, string>();
 
@@ -97,11 +98,11 @@ export default function rankingCommand(
       ack,
       body,
       client,
-    }: SlackActionMiddlewareArgs<BlockAction> & { client: any }) => {
+    }: SlackActionMiddlewareArgs<BlockAction> & { client: WebClient }) => {
       await ack();
       const channelId = channelMap.get(body.user.id);
       if (channelId) {
-        await handleTotalPoints(channelId, workspaceId); // workspaceIdを追加
+        await handleTotalPoints(client, channelId, workspaceId);
         channelMap.delete(body.user.id);
       }
     }
@@ -117,7 +118,7 @@ export default function rankingCommand(
       await ack();
       const channelId = channelMap.get(body.user.id);
       if (channelId) {
-        await handleMonthRanking(channelId, workspaceId); // workspaceIdを追加
+        await handleMonthRanking(client, channelId, workspaceId);
         channelMap.delete(body.user.id);
       }
     }
@@ -129,11 +130,11 @@ export default function rankingCommand(
       ack,
       body,
       client,
-    }: SlackActionMiddlewareArgs<BlockAction> & { client: any }) => {
+    }: SlackActionMiddlewareArgs<BlockAction> & { client: WebClient }) => {
       await ack();
       const channelId = channelMap.get(body.user.id);
       if (channelId) {
-        await handleMyPoints(channelId, body.user.id, workspaceId); // workspaceIdを追加
+        await handleMyPoints(client, channelId, body.user.id, workspaceId); // workspaceIdを追加
         channelMap.delete(body.user.id);
       }
     }

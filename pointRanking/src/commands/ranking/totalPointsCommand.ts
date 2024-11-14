@@ -1,22 +1,20 @@
 import { SlackCommandMiddlewareArgs } from "@slack/bolt";
-import axios from "axios";
+import { WebClient } from "@slack/web-api";
 
 export default function totalPointsCommand(slackBot: any, supabase: any) {
   slackBot.command(
     "/totalpoints",
-    async ({ command, ack }: SlackCommandMiddlewareArgs) => {
+    async ({ command, ack, client }: SlackCommandMiddlewareArgs & { client: any }) => {
       try {
         await ack();
-        handleTotalPoints(command.response_url, command.team_id).catch(
-          console.error
-        );
+        handleTotalPoints(client, command.response_url, command.team_id);
       } catch (error) {
         console.error("ackのエラー:", error);
       }
     }
   );
 
-  const handleTotalPoints = async (channelId: string, workspaceId: string) => {
+  const handleTotalPoints = async (client: WebClient, channelId: string, workspaceId: string) => {
     try {
       const { data: pointsData, error: pointsError } = await supabase
         .from("UserNew")
@@ -32,11 +30,11 @@ export default function totalPointsCommand(slackBot: any, supabase: any) {
       const pointsBlocks = pointsData.map((entry: any, index: number) => {
         const medal =
           index === 0
-            ? ":金メダル:"
+            ? "🥇"
             : index === 1
-            ? ":銀メダル:"
+            ? "🥈"
             : index === 2
-            ? ":銅メダル:"
+            ? "🥉"
             : "";
         return {
           type: "section",
@@ -58,7 +56,7 @@ export default function totalPointsCommand(slackBot: any, supabase: any) {
           type: "section",
           text: {
             type: "mrkdwn",
-            text: "*:トロフィー: 累計ポイントランキング :トロフィー:*\nこちらが累計ポイントのトップランキングです！",
+            text: "*:trophy: 累計ポイントランキング :trophy:*\nこちらが累計ポイントのトップランキングです！",
           },
         },
         {
@@ -70,16 +68,13 @@ export default function totalPointsCommand(slackBot: any, supabase: any) {
         },
       ];
 
-      await axios.post(channelId, {
-        blocks,
-        response_type: "in_channel",
+      await client.chat.postMessage({
+        channel: channelId,
+        blocks: blocks,
+        text: "累計ポイントランキング",
       });
     } catch (error) {
       console.error("累計ポイント取得エラー:", error);
-      await axios.post(channelId, {
-        text: "データの取得に失敗しました",
-        response_type: "in_channel",
-      });
     }
   };
 

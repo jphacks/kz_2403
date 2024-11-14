@@ -1,17 +1,13 @@
 import { SlackCommandMiddlewareArgs } from "@slack/bolt";
-import axios from "axios";
+import { WebClient } from "@slack/web-api";
 
 export default function myPointsCommand(slackBot: any, supabase: any) {
   slackBot.command(
     "/mypoints",
-    async ({ command, ack }: SlackCommandMiddlewareArgs) => {
+    async ({ command, ack, client }: SlackCommandMiddlewareArgs & { client: any }) => {
       try {
         await ack();
-        handleMyPoints(
-          command.response_url,
-          command.user_id,
-          command.team_id
-        ).catch(console.error);
+        await handleMyPoints(client, command.channel_id, command.user_id, command.team_id);
       } catch (error) {
         console.error("ackのエラー:", error);
       }
@@ -19,6 +15,7 @@ export default function myPointsCommand(slackBot: any, supabase: any) {
   );
 
   const handleMyPoints = async (
+    client: WebClient,
     channelId: string,
     userId: string,
     workspaceId: string
@@ -55,15 +52,16 @@ export default function myPointsCommand(slackBot: any, supabase: any) {
         },
       ];
 
-      await axios.post(channelId, {
-        blocks,
-        response_type: "ephemeral",
+      await client.chat.postMessage({
+        channel: channelId,
+        blocks: blocks,
+        text: `あなたのポイント: ${userData.total_point}pt (${userRank}位)`,
       });
     } catch (error) {
       console.error("ユーザーポイント取得エラー:", error);
-      await axios.post(channelId, {
+      await client.chat.postMessage({
+        channel: channelId,
         text: "データの取得に失敗しました",
-        response_type: "ephemeral",
       });
     }
   };
