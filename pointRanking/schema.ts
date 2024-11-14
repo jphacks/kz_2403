@@ -34,48 +34,6 @@ export type Database = {
   }
   public: {
     Tables: {
-      Contract: {
-        Row: {
-          command_name: string
-          created_at: string
-          deadline_at: string
-          updated_at: string
-          user_id: string
-          workspace_id: string
-        }
-        Insert: {
-          command_name: string
-          created_at?: string
-          deadline_at: string
-          updated_at?: string
-          user_id: string
-          workspace_id?: string
-        }
-        Update: {
-          command_name?: string
-          created_at?: string
-          deadline_at?: string
-          updated_at?: string
-          user_id?: string
-          workspace_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "Contract_command_name_fkey"
-            columns: ["command_name"]
-            isOneToOne: false
-            referencedRelation: "SpecialCommand"
-            referencedColumns: ["command_name"]
-          },
-          {
-            foreignKeyName: "Contract_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "User"
-            referencedColumns: ["user_id"]
-          },
-        ]
-      }
       ContractNew: {
         Row: {
           command_name: string
@@ -125,53 +83,368 @@ export type Database = {
           },
         ]
       }
-      Emoji: {
+      D_Contract: {
         Row: {
-          add_user_id: string | null
+          command_name: string
           created_at: string
-          emoji_id: string
-          emoji_name: string
-          label: string | null
+          deadline_at: string
           updated_at: string
-          usage_num: number
+          user_id: string
           workspace_id: string
         }
         Insert: {
-          add_user_id?: string | null
+          command_name: string
           created_at?: string
-          emoji_id: string
-          emoji_name: string
-          label?: string | null
+          deadline_at: string
           updated_at?: string
-          usage_num?: number
+          user_id: string
           workspace_id?: string
         }
         Update: {
-          add_user_id?: string | null
+          command_name?: string
           created_at?: string
-          emoji_id?: string
-          emoji_name?: string
-          label?: string | null
+          deadline_at?: string
           updated_at?: string
-          usage_num?: number
+          user_id?: string
           workspace_id?: string
         }
         Relationships: [
           {
-            foreignKeyName: "Emoji_add_user_id_fkey"
-            columns: ["add_user_id"]
+            foreignKeyName: "D_Contract_command_name_fkey"
+            columns: ["command_name"]
             isOneToOne: false
-            referencedRelation: "User"
-            referencedColumns: ["user_id"]
+            referencedRelation: "D_SpecialCommand"
+            referencedColumns: ["command_name"]
           },
           {
-            foreignKeyName: "Emoji_workspace_id_fkey"
+            foreignKeyName: "D_Contract_user_id_workspace_id_fkey"
+            columns: ["user_id", "workspace_id"]
+            isOneToOne: false
+            referencedRelation: "D_User"
+            referencedColumns: ["user_id", "workspace_id"]
+          },
+          {
+            foreignKeyName: "D_Contract_workspace_id_fkey"
             columns: ["workspace_id"]
             isOneToOne: false
-            referencedRelation: "Workspace"
+            referencedRelation: "D_Workspace"
             referencedColumns: ["workspace_id"]
           },
         ]
+      }
+      D_Emoji: {
+        Row: {
+          created_at: string
+          emoji_id: string
+          emoji_name: string
+          label: string
+          updated_at: string
+          workspace_id: string
+        }
+        Insert: {
+          created_at?: string
+          emoji_id: string
+          emoji_name: string
+          label: string
+          updated_at?: string
+          workspace_id: string
+        }
+        Update: {
+          created_at?: string
+          emoji_id?: string
+          emoji_name?: string
+          label?: string
+          updated_at?: string
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "D_Emoji_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "D_Workspace"
+            referencedColumns: ["workspace_id"]
+          },
+        ]
+      }
+      D_Message: {
+        Row: {
+          channel_id: string
+          created_at: string
+          message_id: string
+          message_text: string
+          updated_at: string
+          user_id: string
+          workspace_id: string
+        }
+        Insert: {
+          channel_id: string
+          created_at?: string
+          message_id: string
+          message_text: string
+          updated_at?: string
+          user_id: string
+          workspace_id: string
+        }
+        Update: {
+          channel_id?: string
+          created_at?: string
+          message_id?: string
+          message_text?: string
+          updated_at?: string
+          user_id?: string
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "D_Message_user_id_workspace_id_fkey"
+            columns: ["user_id", "workspace_id"]
+            isOneToOne: false
+            referencedRelation: "D_User"
+            referencedColumns: ["user_id", "workspace_id"]
+          },
+          {
+            foreignKeyName: "D_Message_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "D_Workspace"
+            referencedColumns: ["workspace_id"]
+          },
+        ]
+      }
+      D_MonthLog: {
+        Row: {
+          created_at: string
+          month_add_point: number
+          updated_at: string
+          user_id: string
+          workspace_id: string
+          year_month: number
+        }
+        Insert: {
+          created_at?: string
+          month_add_point?: number
+          updated_at?: string
+          user_id: string
+          workspace_id: string
+          year_month?: number
+        }
+        Update: {
+          created_at?: string
+          month_add_point?: number
+          updated_at?: string
+          user_id?: string
+          workspace_id?: string
+          year_month?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "D_MonthLog_user_id_workspace_id_fkey"
+            columns: ["user_id", "workspace_id"]
+            isOneToOne: false
+            referencedRelation: "D_User"
+            referencedColumns: ["user_id", "workspace_id"]
+          },
+          {
+            foreignKeyName: "D_MonthLog_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "D_Workspace"
+            referencedColumns: ["workspace_id"]
+          },
+        ]
+      }
+      D_Reaction: {
+        Row: {
+          created_at: string
+          emoji_id: string
+          message_id: string
+          reaction_id: string
+          user_id: string
+          workspace_id: string
+        }
+        Insert: {
+          created_at?: string
+          emoji_id: string
+          message_id: string
+          reaction_id: string
+          user_id: string
+          workspace_id: string
+        }
+        Update: {
+          created_at?: string
+          emoji_id?: string
+          message_id?: string
+          reaction_id?: string
+          user_id?: string
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "D_Reaction_emoji_id_fkey"
+            columns: ["emoji_id"]
+            isOneToOne: false
+            referencedRelation: "D_Emoji"
+            referencedColumns: ["emoji_id"]
+          },
+          {
+            foreignKeyName: "D_Reaction_message_id_workspace_id_fkey"
+            columns: ["message_id", "workspace_id"]
+            isOneToOne: false
+            referencedRelation: "D_Message"
+            referencedColumns: ["message_id", "workspace_id"]
+          },
+          {
+            foreignKeyName: "D_Reaction_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "D_Workspace"
+            referencedColumns: ["workspace_id"]
+          },
+          {
+            foreignKeyName: "D_Reaction_workspace_id_user_id_fkey"
+            columns: ["workspace_id", "user_id"]
+            isOneToOne: false
+            referencedRelation: "D_User"
+            referencedColumns: ["workspace_id", "user_id"]
+          },
+        ]
+      }
+      D_Remind: {
+        Row: {
+          created_at: string
+          message_ts: string
+          remind_id: number
+          user_id: string
+          workspace_id: string
+        }
+        Insert: {
+          created_at?: string
+          message_ts: string
+          remind_id?: number
+          user_id: string
+          workspace_id: string
+        }
+        Update: {
+          created_at?: string
+          message_ts?: string
+          remind_id?: number
+          user_id?: string
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "D_Remind_user_id_workspace_id_fkey"
+            columns: ["user_id", "workspace_id"]
+            isOneToOne: false
+            referencedRelation: "D_User"
+            referencedColumns: ["user_id", "workspace_id"]
+          },
+          {
+            foreignKeyName: "D_Remind_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "D_Workspace"
+            referencedColumns: ["workspace_id"]
+          },
+        ]
+      }
+      D_SpecialCommand: {
+        Row: {
+          command_name: string
+          cost: number
+          created_at: string
+          updated_at: string
+          workspace_id: string
+        }
+        Insert: {
+          command_name: string
+          cost?: number
+          created_at?: string
+          updated_at?: string
+          workspace_id?: string
+        }
+        Update: {
+          command_name?: string
+          cost?: number
+          created_at?: string
+          updated_at?: string
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "D_SpecialCommand_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "D_Workspace"
+            referencedColumns: ["workspace_id"]
+          },
+        ]
+      }
+      D_User: {
+        Row: {
+          add_point: number
+          created_at: string
+          total_point: number
+          updated_at: string
+          user_id: string
+          user_name: string
+          workspace_id: string
+        }
+        Insert: {
+          add_point?: number
+          created_at?: string
+          total_point?: number
+          updated_at?: string
+          user_id: string
+          user_name: string
+          workspace_id?: string
+        }
+        Update: {
+          add_point?: number
+          created_at?: string
+          total_point?: number
+          updated_at?: string
+          user_id?: string
+          user_name?: string
+          workspace_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "D_User_workspace_id_fkey"
+            columns: ["workspace_id"]
+            isOneToOne: false
+            referencedRelation: "D_Workspace"
+            referencedColumns: ["workspace_id"]
+          },
+        ]
+      }
+      D_Workspace: {
+        Row: {
+          created_at: string
+          discord_bot_token: string | null
+          discord_signing_token: string | null
+          DISCORD_WEBHOOK_URL: string | null
+          updated_at: string
+          workspace_id: string
+        }
+        Insert: {
+          created_at?: string
+          discord_bot_token?: string | null
+          discord_signing_token?: string | null
+          DISCORD_WEBHOOK_URL?: string | null
+          updated_at?: string
+          workspace_id: string
+        }
+        Update: {
+          created_at?: string
+          discord_bot_token?: string | null
+          discord_signing_token?: string | null
+          DISCORD_WEBHOOK_URL?: string | null
+          updated_at?: string
+          workspace_id?: string
+        }
+        Relationships: []
       }
       EmojiNew: {
         Row: {
@@ -208,38 +481,45 @@ export type Database = {
           },
         ]
       }
-      Message: {
+      LinkedUser: {
         Row: {
-          channnel_id: string
           created_at: string
-          message_id: string
-          message_text: string
-          message_user_id: string
-          update_at: string
+          discord_user_id: string
+          discord_workspace_id: string | null
+          slack_user_id: string
+          slack_workspace_id: string | null
+          updated_at: string
         }
         Insert: {
-          channnel_id: string
           created_at?: string
-          message_id: string
-          message_text: string
-          message_user_id: string
-          update_at?: string
+          discord_user_id: string
+          discord_workspace_id?: string | null
+          slack_user_id: string
+          slack_workspace_id?: string | null
+          updated_at?: string
         }
         Update: {
-          channnel_id?: string
           created_at?: string
-          message_id?: string
-          message_text?: string
-          message_user_id?: string
-          update_at?: string
+          discord_user_id?: string
+          discord_workspace_id?: string | null
+          slack_user_id?: string
+          slack_workspace_id?: string | null
+          updated_at?: string
         }
         Relationships: [
           {
-            foreignKeyName: "Message_message_user_id_fkey"
-            columns: ["message_user_id"]
+            foreignKeyName: "LinkedUser_discord_user_id_discord_workspace_id_fkey"
+            columns: ["discord_user_id", "discord_workspace_id"]
             isOneToOne: false
-            referencedRelation: "User"
-            referencedColumns: ["user_id"]
+            referencedRelation: "D_User"
+            referencedColumns: ["user_id", "workspace_id"]
+          },
+          {
+            foreignKeyName: "LinkedUser_slack_user_id_slack_workspace_id_fkey"
+            columns: ["slack_user_id", "slack_workspace_id"]
+            isOneToOne: false
+            referencedRelation: "UserNew"
+            referencedColumns: ["user_id", "workspace_id"]
           },
         ]
       }
@@ -280,7 +560,7 @@ export type Database = {
             referencedColumns: ["workspace_id"]
           },
           {
-            foreignKeyName: "MessageNew_workspace_id_message_user_id_fkey"
+            foreignKeyName: "MessageNew_workspace_id_user_id_fkey"
             columns: ["workspace_id", "user_id"]
             isOneToOne: false
             referencedRelation: "UserNew"
@@ -288,75 +568,30 @@ export type Database = {
           },
         ]
       }
-      MonthLog: {
-        Row: {
-          created_at: string
-          month_total_point: number
-          month_year: number
-          result_month: string
-          update_at: string
-          user_id: string
-          workspace_id: string
-        }
-        Insert: {
-          created_at?: string
-          month_total_point?: number
-          month_year?: number
-          result_month: string
-          update_at?: string
-          user_id: string
-          workspace_id?: string
-        }
-        Update: {
-          created_at?: string
-          month_total_point?: number
-          month_year?: number
-          result_month?: string
-          update_at?: string
-          user_id?: string
-          workspace_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "MonthLog_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "User"
-            referencedColumns: ["user_id"]
-          },
-          {
-            foreignKeyName: "MonthLog_workspace_id_fkey"
-            columns: ["workspace_id"]
-            isOneToOne: false
-            referencedRelation: "Workspace"
-            referencedColumns: ["workspace_id"]
-          },
-        ]
-      }
       MonthLogNew: {
         Row: {
           created_at: string
-          month_total_point: number
-          month_year: number
+          month_add_point: number
           updated_at: string
           user_id: string
           workspace_id: string
+          year_month: number
         }
         Insert: {
           created_at?: string
-          month_total_point?: number
-          month_year?: number
+          month_add_point?: number
           updated_at?: string
           user_id: string
           workspace_id: string
+          year_month?: number
         }
         Update: {
           created_at?: string
-          month_total_point?: number
-          month_year?: number
+          month_add_point?: number
           updated_at?: string
           user_id?: string
           workspace_id?: string
+          year_month?: number
         }
         Relationships: [
           {
@@ -371,62 +606,6 @@ export type Database = {
             columns: ["workspace_id"]
             isOneToOne: false
             referencedRelation: "WorkspaceNew"
-            referencedColumns: ["workspace_id"]
-          },
-        ]
-      }
-      Reaction: {
-        Row: {
-          created_at: string
-          emoji_id: string
-          message_id: string
-          reaction_id: string
-          reaction_user_id: string
-          workspace_id: string
-        }
-        Insert: {
-          created_at?: string
-          emoji_id: string
-          message_id: string
-          reaction_id: string
-          reaction_user_id: string
-          workspace_id?: string
-        }
-        Update: {
-          created_at?: string
-          emoji_id?: string
-          message_id?: string
-          reaction_id?: string
-          reaction_user_id?: string
-          workspace_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "Reaction_emoji_id_fkey"
-            columns: ["emoji_id"]
-            isOneToOne: false
-            referencedRelation: "Emoji"
-            referencedColumns: ["emoji_id"]
-          },
-          {
-            foreignKeyName: "Reaction_message_id_fkey"
-            columns: ["message_id"]
-            isOneToOne: false
-            referencedRelation: "Message"
-            referencedColumns: ["message_id"]
-          },
-          {
-            foreignKeyName: "Reaction_reaction_user_id_fkey"
-            columns: ["reaction_user_id"]
-            isOneToOne: false
-            referencedRelation: "User"
-            referencedColumns: ["user_id"]
-          },
-          {
-            foreignKeyName: "Reaction_workspace_id_fkey"
-            columns: ["workspace_id"]
-            isOneToOne: false
-            referencedRelation: "Workspace"
             referencedColumns: ["workspace_id"]
           },
         ]
@@ -490,18 +669,21 @@ export type Database = {
       Remind: {
         Row: {
           created_at: string
+          message_ts: string
           remind_id: number
           user_id: string
           workspace_id: string
         }
         Insert: {
           created_at?: string
+          message_ts: string
           remind_id?: number
           user_id: string
           workspace_id: string
         }
         Update: {
           created_at?: string
+          message_ts?: string
           remind_id?: number
           user_id?: string
           workspace_id?: string
@@ -514,36 +696,11 @@ export type Database = {
             referencedRelation: "UserNew"
             referencedColumns: ["user_id", "workspace_id"]
           },
-        ]
-      }
-      SpecialCommand: {
-        Row: {
-          command_name: string
-          cost: number
-          created_at: string
-          updated_at: string
-          workspace_id: string
-        }
-        Insert: {
-          command_name: string
-          cost?: number
-          created_at?: string
-          updated_at?: string
-          workspace_id?: string
-        }
-        Update: {
-          command_name?: string
-          cost?: number
-          created_at?: string
-          updated_at?: string
-          workspace_id?: string
-        }
-        Relationships: [
           {
-            foreignKeyName: "SpecialCommand_workspace_id_fkey"
+            foreignKeyName: "Remind_workspace_id_fkey"
             columns: ["workspace_id"]
             isOneToOne: false
-            referencedRelation: "Workspace"
+            referencedRelation: "WorkspaceNew"
             referencedColumns: ["workspace_id"]
           },
         ]
@@ -576,44 +733,6 @@ export type Database = {
             columns: ["workspace_id"]
             isOneToOne: false
             referencedRelation: "WorkspaceNew"
-            referencedColumns: ["workspace_id"]
-          },
-        ]
-      }
-      User: {
-        Row: {
-          created_at: string
-          earned_point: number
-          total_point: number
-          updated_at: string
-          user_id: string
-          user_name: string
-          workspace_id: string
-        }
-        Insert: {
-          created_at?: string
-          earned_point?: number
-          total_point?: number
-          updated_at?: string
-          user_id: string
-          user_name: string
-          workspace_id?: string
-        }
-        Update: {
-          created_at?: string
-          earned_point?: number
-          total_point?: number
-          updated_at?: string
-          user_id?: string
-          user_name?: string
-          workspace_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "User_workdspace_id_fkey"
-            columns: ["workspace_id"]
-            isOneToOne: false
-            referencedRelation: "Workspace"
             referencedColumns: ["workspace_id"]
           },
         ]
@@ -656,49 +775,28 @@ export type Database = {
           },
         ]
       }
-      Workspace: {
-        Row: {
-          created_at: string
-          slack_bot_token: string | null
-          slack_singing_token: string | null
-          updated_at: string
-          workspace_id: string
-        }
-        Insert: {
-          created_at?: string
-          slack_bot_token?: string | null
-          slack_singing_token?: string | null
-          updated_at?: string
-          workspace_id: string
-        }
-        Update: {
-          created_at?: string
-          slack_bot_token?: string | null
-          slack_singing_token?: string | null
-          updated_at?: string
-          workspace_id?: string
-        }
-        Relationships: []
-      }
       WorkspaceNew: {
         Row: {
           created_at: string
           slack_bot_token: string | null
-          slack_singing_token: string | null
+          slack_signing_token: string | null
+          SLACK_WEBHOOK_URL: string | null
           updated_at: string
           workspace_id: string
         }
         Insert: {
           created_at?: string
           slack_bot_token?: string | null
-          slack_singing_token?: string | null
+          slack_signing_token?: string | null
+          SLACK_WEBHOOK_URL?: string | null
           updated_at?: string
           workspace_id: string
         }
         Update: {
           created_at?: string
           slack_bot_token?: string | null
-          slack_singing_token?: string | null
+          slack_signing_token?: string | null
+          SLACK_WEBHOOK_URL?: string | null
           updated_at?: string
           workspace_id?: string
         }
