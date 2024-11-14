@@ -1,25 +1,33 @@
 import { SlackCommandMiddlewareArgs } from "@slack/bolt";
-import axios from "axios";
+import { WebClient } from "@slack/web-api";
 
 export default function monthRankingCommand(slackBot: any, supabase: any) {
-  slackBot.command("/monthranking", async ({ command, ack }: SlackCommandMiddlewareArgs) => {
-    try {
-      await ack();
-      const workspaceId = command.team_id;
-      handleMonthRanking(command.response_url, workspaceId).catch(console.error);
-    } catch (error) {
-      console.error("ackのエラー:", error);
+  slackBot.command(
+    "/monthranking",
+    async ({ command, ack, client }: SlackCommandMiddlewareArgs & { client: any }) => {
+      try {
+        await ack();
+        const workspaceId = command.team_id;
+        await handleMonthRanking(client, command.channel_id, workspaceId);
+      } catch (error) {
+        console.error("ackのエラー:", error);
+      }
     }
-  });
+  );
 
-  const handleMonthRanking = async (channelId: string, workspaceId: string) => {
+  const handleMonthRanking = async (
+    client: WebClient,
+    channelId: string,
+    workspaceId: string
+  ) => {
     try {
-      const currentMonth = new Date().toISOString().slice(0, 7) + "-01";
+      const today = new Date();
+      const yearMonth = `${today.getFullYear()}${String(today.getMonth() + 1).padStart(2, '0')}`;
 
       const { data: rankingData, error: rankingError } = await supabase
         .from("MonthLogNew")
-        .select("user_id, workspace_id, month_add_point")
-        .eq("result_month", currentMonth)
+        .select("user_id, workspace_id, year_month, month_add_point")
+        .eq("year_month", yearMonth)
         .eq("workspace_id", workspaceId)
         .order("month_add_point", { ascending: false })
         .limit(10);
@@ -33,14 +41,17 @@ export default function monthRankingCommand(slackBot: any, supabase: any) {
         .from("UserNew")
         .select("user_id, workspace_id, user_name")
         .in("user_id", userIds)
-        .eq("work_space_id", workspaceId);
+        .eq("workspace_id", workspaceId);
 
       if (usersError) {
         throw new Error("UserNewテーブルの取得に失敗しました");
       }
 
       const userIdToName: { [key: string]: string } = usersData.reduce(
-        (acc: { [key: string]: string }, user: { user_id: string; user_name: string }) => {
+        (
+          acc: { [key: string]: string },
+          user: { user_id: string; user_name: string }
+        ) => {
           acc[user.user_id] = user.user_name;
           return acc;
         },
@@ -66,7 +77,7 @@ export default function monthRankingCommand(slackBot: any, supabase: any) {
           fields: [
             {
               type: "mrkdwn",
-              text: `*スコア:* ${entry.month_total_point}pts`,
+              text: `*スコア:* ${entry.month_add_point}pts`,
             },
           ],
         };
@@ -77,7 +88,7 @@ export default function monthRankingCommand(slackBot: any, supabase: any) {
           type: "section",
           text: {
             type: "mrkdwn",
-            text: "*:trophy: 最新ランキング :trophy:*\nこちらが最新のトップランキングです！",
+            text: "*:trophy: 最新ランキング :trophy:*\nこちらが今月のトップランキングです！",
           },
         },
         {
@@ -89,17 +100,18 @@ export default function monthRankingCommand(slackBot: any, supabase: any) {
         },
       ];
 
-      await axios.post(channelId, {
-        blocks,
-        response_type: "in_channel",
+      await client.chat.postMessage({
+        channel: channelId,
+        blocks: blocks,
+        text: "月間ポイントランキング",
       });
     } catch (error) {
       console.error("ポイントランキング取得エラー:", error);
-      await axios.post(channelId, {
+      await client.chat.postMessage({
+        channel: channelId,
         text: "データの取得に失敗しました",
-        response_type: "in_channel",
       });
-  }
-}
+    }
+  };
   return { handleMonthRanking };
 }

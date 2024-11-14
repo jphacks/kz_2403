@@ -1,6 +1,6 @@
 import { useSlackbot } from "./hooks/useSlackbot";
 import { useSupabase } from "./hooks/useSupabase";
-import { decorateCommand, questionCommand, rankingCommand } from "./commands";
+import { decorateCommand, questionCommand, rankingCommand, voteCommand } from "./commands";
 import { handleMessageEvent, handleReactionAdded } from "./handlers";
 
 (async () => {
@@ -11,6 +11,7 @@ import { handleMessageEvent, handleReactionAdded } from "./handlers";
   rankingCommand(slackBot, supabase, workspaceId);
   decorateCommand(slackBot);
   questionCommand({slackBot, slackClient});
+  voteCommand({slackBot, slackClient});
 
   // イベントハンドラーの登録
   slackBot.event("reaction_added", async ({ event, client }) => {
