@@ -4,7 +4,8 @@ import { ensureWorkspaceExists } from "./ensureWorkspaceExists";
 export const ensureEmojiExists = async (
   workspaceId: string,
   emojiId: string,
-  emojiName: string
+  emojiName: string,
+  label?: string
 ): Promise<void> => {
   const { supabase } = useSupabase();
 
@@ -31,7 +32,7 @@ export const ensureEmojiExists = async (
           workspace_id: workspaceId,
           emoji_id: emojiId,
           emoji_name: emojiName,
-          label: '',
+          label: label ?? '',
           created_at: new Date().toISOString(),
           updated_at: new Date().toISOString(),
         },
