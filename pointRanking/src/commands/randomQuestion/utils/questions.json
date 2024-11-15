@@ -14,6 +14,191 @@
       "id": "q3",
       "text": "今週末の予定は？",
       "category": "daily"
+    },
+    {
+      "id": "q4",
+      "text": "これまでで一番誇りに思う達成は何ですか？",
+      "category": "self-reflection"
+    },
+    {
+      "id": "q5",
+      "text": "最近読んだ本や記事で心に残ったものは？",
+      "category": "learning"
+    },
+    {
+      "id": "q6",
+      "text": "好きな季節とその理由は？",
+      "category": "preferences"
+    },
+    {
+      "id": "q7",
+      "text": "新しいスキルを学ぶとしたら、何を選びますか？",
+      "category": "goals"
+    },
+    {
+      "id": "q8",
+      "text": "次の休暇ではどこに行きたいですか？",
+      "category": "travel"
+    },
+    {
+      "id": "q9",
+      "text": "子供の頃の夢は何でしたか？",
+      "category": "self-reflection"
+    },
+    {
+      "id": "q10",
+      "text": "職場で最近改善したいと感じたことは？",
+      "category": "work"
+    },
+    {
+      "id": "q11",
+      "text": "人生で一度やってみたいことは？",
+      "category": "goals"
+    },
+    {
+      "id": "q12",
+      "text": "好きな音楽のジャンルは？",
+      "category": "preferences"
+    },
+    {
+      "id": "q13",
+      "text": "一番大切にしている価値観は何ですか？",
+      "category": "self-reflection"
+    },
+    {
+      "id": "q14",
+      "text": "今までで一番感動した映画は何ですか？",
+      "category": "preferences"
+    },
+    {
+      "id": "q15",
+      "text": "目標を達成するために現在行っていることは？",
+      "category": "goals"
+    },
+    {
+      "id": "q16",
+      "text": "最近挑戦した料理は何ですか？",
+      "category": "daily"
+    },
+    {
+      "id": "q17",
+      "text": "理想の一日をどのように過ごしますか？",
+      "category": "self-reflection"
+    },
+    {
+      "id": "q18",
+      "text": "尊敬している人物は誰ですか？",
+      "category": "self-reflection"
+    },
+    {
+      "id": "q19",
+      "text": "今注目しているトレンドは何ですか？",
+      "category": "learning"
+    },
+    {
+      "id": "q20",
+      "text": "最近新たに興味を持ったことは何ですか？",
+      "category": "learning"
+    },
+    {
+      "id": "q21",
+      "text": "これまでに訪れた中で一番印象的だった場所はどこですか？",
+      "category": "travel"
+    },
+    {
+      "id": "q22",
+      "text": "最近見た中で面白かったドキュメンタリーは？",
+      "category": "preferences"
+    },
+    {
+      "id": "q23",
+      "text": "一日の中で最もリラックスできる時間帯はいつですか？",
+      "category": "daily"
+    },
+    {
+      "id": "q24",
+      "text": "次に挑戦したい趣味は何ですか？",
+      "category": "goals"
+    },
+    {
+      "id": "q25",
+      "text": "理想的なチームワークとは何だと思いますか？",
+      "category": "work"
+    },
+    {
+      "id": "q26",
+      "text": "最近学んだ最も重要な教訓は何ですか？",
+      "category": "learning"
+    },
+    {
+      "id": "q27",
+      "text": "自分にとって成功とはどのようなものですか？",
+      "category": "self-reflection"
+    },
+    {
+      "id": "q28",
+      "text": "どのような場面で最も集中力が高まりますか？",
+      "category": "self-reflection"
+    },
+    {
+      "id": "q29",
+      "text": "幼少期に好きだった遊びは何ですか？",
+      "category": "self-reflection"
+    },
+    {
+      "id": "q30",
+      "text": "最近のニュースで気になった出来事は？",
+      "category": "learning"
+    },
+    {
+      "id": "q31",
+      "text": "過去の旅行で思い出に残る食べ物は何ですか？",
+      "category": "travel"
+    },
+    {
+      "id": "q32",
+      "text": "どのようなときに一番創造的になれると思いますか？",
+      "category": "self-reflection"
+    },
+    {
+      "id": "q33",
+      "text": "一番好きな子供時代の記憶は何ですか？",
+      "category": "self-reflection"
+    },
+    {
+      "id": "q34",
+      "text": "どんな未来のテクノロジーに期待していますか？",
+      "category": "learning"
+    },
+    {
+      "id": "q35",
+      "text": "最も影響を受けた本や人物は誰／何ですか？",
+      "category": "self-reflection"
+    },
+    {
+      "id": "q36",
+      "text": "人生で最も挑戦的だった出来事は何でしたか？",
+      "category": "self-reflection"
+    },
+    {
+      "id": "q37",
+      "text": "日々の生活で感謝していることは何ですか？",
+      "category": "daily"
+    },
+    {
+      "id": "q38",
+      "text": "新しいアイデアが思いついたとき、どうしていますか？",
+      "category": "work"
+    },
+    {
+      "id": "q39",
+      "text": "あなたにとって最高の休日の過ごし方は何ですか？",
+      "category": "preferences"
+    },
+    {
+      "id": "q40",
+      "text": "これから1年間で達成したいことは何ですか？",
+      "category": "goals"
     }
   ]
 }
