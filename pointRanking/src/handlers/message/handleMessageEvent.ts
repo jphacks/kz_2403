@@ -2,6 +2,8 @@ import { callAddFileSharePointsEdgeFunction } from "../../edgeFunction";
 import { callAddKeywordPointsEdgeFunction } from "../../edgeFunction";
 import { callAddMentionPointsEdgeFunction } from "../../edgeFunction";
 import { saveMessage } from "../../saveData";
+import { fetchUserInfo } from "../../utils";
+import { WebClient } from "@slack/web-api";
 
 interface MessageEvent {
   type: string;
@@ -18,11 +20,15 @@ export const handleMessageEvent = async (
   event: any,
   serviceRoleKey: string,
   workspaceId: string,
+  client: WebClient
 ) => {
   const { user, ts, channel_type, files } = event;
   const messageId = ts;
   const messageUserId = user;
   const channelId = event.channel;
+
+  // ユーザー名を取得
+  const userName = await fetchUserInfo(client, messageUserId);
 
   // メッセージデータを保存
   const isMessageSaved = await saveMessage({
@@ -30,6 +36,7 @@ export const handleMessageEvent = async (
     workspaceId,
     messageText: event.text,
     userId: messageUserId,
+    userName,
     channelId,
   });
 

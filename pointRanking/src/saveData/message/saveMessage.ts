@@ -1,15 +1,28 @@
 import { useSupabase } from "../../hooks/useSupabase";
+import { ensureUserExists } from "../../utils";
 
 interface Payload {
   messageId: string;
   workspaceId: string;
   messageText: string;
   userId: string;
+  userName: string;
   channelId: string;
 }
 
 export const saveMessage = async (payload: Payload): Promise<boolean> => {
   const { supabase } = useSupabase();
+
+  const userPayload = {
+    userId: payload.userId,
+    userName: payload.userName,
+    workspaceId: payload.workspaceId,
+  };
+  const userExists = await ensureUserExists(userPayload);
+
+  if (!userExists) {
+    return false;
+  }
 
   // メッセージが存在するか確認
   const { data: messageExists, error: selectError } = await supabase

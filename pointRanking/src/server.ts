@@ -30,8 +30,8 @@ import { RandomQuestionScheduler } from "./schedulers/randomQuestionScheduler";
     await handleReactionAdded(event, client, serviceRoleKey, workspaceId);
   });
 
-  slackBot.event("message", async ({ event }) => {
-    await handleMessageEvent(event, serviceRoleKey, workspaceId);
+  slackBot.event("message", async ({ event, client }) => {
+    await handleMessageEvent(event, serviceRoleKey, workspaceId, client);
   });
 
   // サーバーの起動
