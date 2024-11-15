@@ -3,10 +3,10 @@ import { callEdgeFunction } from "./callEdgeFunction";
 export const callAddMentionPointsEdgeFunction = async (
   serviceRoleKey: string,
   messageId: string,
-  reactionUserId: string
+  messageUserId: string
 ): Promise<any> => {
   const pathKey = "mention_points";
-  const payload = { messageId, reactionUserId };
+  const payload = { messageId, messageUserId };
 
   return await callEdgeFunction(pathKey, serviceRoleKey, payload);
 };

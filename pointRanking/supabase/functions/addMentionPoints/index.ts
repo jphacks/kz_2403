@@ -115,9 +115,9 @@ serve(async (req) => {
       const currentTotalPoint = (userData as User).total_point || 0;
       const newTotalPoint = currentTotalPoint + 1;
 
-      // Userテーブルのtotal_pointを更新
+      // UserNewテーブルのtotal_pointを更新
       const { error: updateError } = await supabase
-        .from("User")
+        .from("UserNew")
         .update({ total_point: newTotalPoint })
         .eq("user_id", userId);
 
