@@ -4,7 +4,8 @@ import { VoteData } from "../types";
 export function buildVoteMessage(
   question: string,
   options: string[],
-  endTime: number
+  endTime: number,
+  imageUrl?: string
 ): KnownBlock[] {
   const endTimeDate = new Date(endTime);
   const formattedEndTime = endTimeDate.toLocaleString("ja-JP", {
@@ -15,28 +16,40 @@ export function buildVoteMessage(
     minute: "2-digit",
   });
 
-  return [
+  const blocks: KnownBlock[] = [
     {
       type: "section",
       text: {
         type: "mrkdwn",
-        text: `*質問*\n${question}\n\n*終了時刻*\n${formattedEndTime}`,
+        text: `@channel *投票*\n${question}\n\n*終了時刻*\n${formattedEndTime}`,
       },
     },
-    {
-      type: "actions",
-      block_id: "vote_actions",
-      elements: options.map((option, index) => ({
-        type: "button",
-        text: {
-          type: "plain_text",
-          text: option,
-        },
-        value: `vote_option_${index + 1}`,
-        action_id: `vote_option_${index + 1}`,
-      })),
-    },
   ];
+
+  // 画像が指定されている場合は追加
+  if (imageUrl) {
+    blocks.push({
+      type: "image",
+      image_url: imageUrl,
+      alt_text: "投票の画像",
+    });
+  }
+
+  blocks.push({
+    type: "actions",
+    block_id: "vote_actions",
+    elements: options.map((option, index) => ({
+      type: "button",
+      text: {
+        type: "plain_text",
+        text: option,
+      },
+      value: `vote_option_${index + 1}`,
+      action_id: `vote_option_${index + 1}`,
+    })),
+  });
+
+  return blocks;
 }
 
 export function buildVoteResultMessage(
@@ -52,13 +65,25 @@ export function buildVoteResultMessage(
         text: `${question}`,
       },
     },
+  ];
+
+  // 画像が存在する場合は追加
+  if (voteData.imageUrl) {
+    blocks.push({
+      type: "image",
+      image_url: voteData.imageUrl,
+      alt_text: "投票の画像",
+    });
+  }
+
+  blocks.push(
     {
       type: "section",
       text: {
         type: "mrkdwn",
         text: results
           .map(
-            (r, index) =>
+            (r) =>
               `${r.option}: ${r.count}票 (${r.voters
                 .map((id) => `<@${id}>`)
                 .join(", ")})`
@@ -68,8 +93,8 @@ export function buildVoteResultMessage(
     },
     {
       type: "divider",
-    },
-  ];
+    }
+  );
 
   // 投票が終了していない場合はボタンを追加
   if (Date.now() < voteData.endTime) {

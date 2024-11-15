@@ -57,6 +57,20 @@ export default function voteCommand({ slackBot }: SlackCommandProps) {
                   text: "質問",
                 },
               },
+              {
+                type: "input",
+                block_id: "image_block",
+                optional: true,
+                element: {
+                  type: "file_input",
+                  action_id: "vote_image",
+                  filetypes: ["jpg", "jpeg", "png", "gif"],
+                },
+                label: {
+                  type: "plain_text",
+                  text: "画像を追加（任意）",
+                }
+              },
               //日付選択
               {
                 type: "input",

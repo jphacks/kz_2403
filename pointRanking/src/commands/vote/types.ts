@@ -7,6 +7,7 @@ export interface VoteData {
   options: string[];
   votes: Map<string, Set<string>>;
   endTime: number;
+  imageUrl?: string;
 }
 
 export interface ExtendedSlackCommandMiddlewareArgs

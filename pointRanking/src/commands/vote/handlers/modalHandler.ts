@@ -1,9 +1,8 @@
 import { SlackViewMiddlewareArgs, ViewSubmitAction } from "@slack/bolt";
-import {
-  buildVoteMessage,
-} from "../utils/messageBuilder";
+import { buildVoteMessage } from "../utils/messageBuilder";
 import { voteStore } from "../utils/voteStore";
 import { WebClient } from "@slack/web-api";
+import { KnownBlock, ImageBlock } from "@slack/types";
 
 export async function handleVoteModalSubmission({
   ack,
@@ -52,11 +51,16 @@ export async function handleVoteModalSubmission({
       }
     }
 
+    // 画像URLを取得
+    const imageBlock = view.state.values.image_block?.vote_image;
+    const files = imageBlock?.files;
+    const imageUrl = files?.[0]?.permalink;
+
     // 投票メッセージを投稿
     const message = await client.chat.postMessage({
       channel: channelId,
       text: question,
-      blocks: buildVoteMessage(question, options, endTimestamp),
+      blocks: buildVoteMessage(question, options, endTimestamp, imageUrl),
     });
 
     // 投票データを保存
@@ -66,6 +70,7 @@ export async function handleVoteModalSubmission({
         options,
         votes: new Map(),
         endTime: endTimestamp,
+        imageUrl,
       });
 
       // 終了時のタイマーをセット
@@ -91,9 +96,23 @@ export async function handleVoteModalSubmission({
                 type: "section",
                 text: {
                   type: "mrkdwn",
-                  text: "*投票結果*\n" + question,
+                  text: "@channel *投票結果*\n" + question,
                 },
               },
+              // 画像ブロックを追加
+              ...(voteData.imageUrl
+                ? [
+                    {
+                      type: "image",
+                      title: {
+                        type: "plain_text",
+                        text: "投票の画像",
+                      },
+                      image_url: voteData.imageUrl,
+                      alt_text: "投票の画像",
+                    } as ImageBlock,
+                  ]
+                : []),
               {
                 type: "section",
                 text: {
