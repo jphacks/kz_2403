@@ -12,8 +12,8 @@ export class RandomQuestionScheduler {
   }
 
   private getRandomInterval(): number {
-    const minInterval = 4 * 60 * 60 * 1000; // 4時間
-    const maxInterval = 8 * 60 * 60 * 1000; // 8時間
+    const minInterval = 2 * 60 * 60 * 1000; // 2時間
+    const maxInterval = 4 * 60 * 60 * 1000; // 4時間
     return (
       Math.floor(Math.random() * (maxInterval - minInterval)) + minInterval
     );
@@ -25,7 +25,7 @@ export class RandomQuestionScheduler {
     const day = now.getDay();
 
     if (day === 0 || day === 6) return false; // 土日は除外
-    return hour >= 9 && hour < 18; // 9時から18時の間
+    return hour >= 8 && hour < 20; // 8時から20時の間
   }
 
   start() {
