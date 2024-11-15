@@ -1,7 +1,14 @@
 import { useSlackbot } from "./hooks/useSlackbot";
 import { useSupabase } from "./hooks/useSupabase";
-import { decorateCommand, questionCommand, rankingCommand, voteCommand } from "./commands";
+import {
+  decorateCommand,
+  questionCommand,
+  randomQuestionCommand,
+  rankingCommand,
+  voteCommand,
+} from "./commands";
 import { handleMessageEvent, handleReactionAdded } from "./handlers";
+import { RandomQuestionScheduler } from "./schedulers/randomQuestionScheduler";
 
 (async () => {
   const { slackBot, slackClient, PORT, workspaceId } = await useSlackbot();
@@ -10,8 +17,13 @@ import { handleMessageEvent, handleReactionAdded } from "./handlers";
   // コマンドの登録
   rankingCommand(slackBot, supabase, workspaceId);
   decorateCommand(slackBot);
-  questionCommand({slackBot, slackClient});
-  voteCommand({slackBot, slackClient});
+  questionCommand({ slackBot, slackClient });
+  voteCommand({ slackBot, slackClient });
+  randomQuestionCommand({ slackBot, slackClient });
+
+  const targetChannelId = "C07RKUFBS8N";
+  const scheduler = new RandomQuestionScheduler(slackClient, targetChannelId);
+  scheduler.start();
 
   // イベントハンドラーの登録
   slackBot.event("reaction_added", async ({ event, client }) => {

@@ -1,0 +1,19 @@
+{
+  "questions": [
+    {
+      "id": "q1",
+      "text": "今日一番嬉しかったことは何ですか？",
+      "category": "daily"
+    },
+    {
+      "id": "q2",
+      "text": "最近のチャレンジは何ですか？",
+      "category": "work"
+    },
+    {
+      "id": "q3",
+      "text": "今週末の予定は？",
+      "category": "daily"
+    }
+  ]
+}
