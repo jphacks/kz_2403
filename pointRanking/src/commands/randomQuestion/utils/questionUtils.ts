@@ -1,10 +1,16 @@
-import questions from "./questions.json";
+import questionsData from "./questions.json";
 
 interface Question {
   id: string;
   text: string;
   category: string;
 }
+
+interface QuestionsData {
+  questions: Question[];
+}
+
+const questions: QuestionsData = questionsData as QuestionsData;
 
 export function getRandomQuestion(): Question {
   const { questions: questionList } = questions;

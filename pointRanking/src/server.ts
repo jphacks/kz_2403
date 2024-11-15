@@ -21,7 +21,7 @@ import { RandomQuestionScheduler } from "./schedulers/randomQuestionScheduler";
   voteCommand({ slackBot, slackClient });
   randomQuestionCommand({ slackBot, slackClient });
 
-  const targetChannelId = "C07RKUFBS8N";
+  const targetChannelId = "C080L8HGB47";
   const scheduler = new RandomQuestionScheduler(slackClient, targetChannelId);
   scheduler.start();
 
