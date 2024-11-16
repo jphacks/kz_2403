@@ -1,32 +1,13 @@
 import {
-    Client,
-    GatewayIntentBits,
-    Partials,
-    Events,
+  ActionRowBuilder,
+  ButtonBuilder,
+    ButtonStyle,
     Message,
+    TextChannel,
   } from 'discord.js';
-  import { createClient } from '@supabase/supabase-js';
-  import dotenv from 'dotenv';
+import { supabase } from './hooks/useSupabase';
   
-  dotenv.config();
-  
-  // Supabaseクライアントの初期化
-  const supabase = createClient(
-    process.env.SUPABASE_URL as string,
-    process.env.SUPABASE_API_KEY as string
-  );
-  
-  const client = new Client({
-    intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages],
-    partials: [Partials.Message, Partials.Channel],
-  });
-  
-  client.once('ready', () => {
-    console.log(`Logged in as ${client.user?.tag}`);
-  });
-  
-  
-  client.on(Events.MessageCreate, async (message: Message) => {
+export const messageCreateHandler= async (message: Message) => {
     // Botのメッセージは無視する
     if (message.author.bot) return;
   
@@ -37,6 +18,10 @@ import {
     const guildId = message.guild?.id || null; // サーバーIDを取得
     const channelId = message.channelId; // チャンネルID
     const userName = message.author.username; // ユーザー名を取得
+    const mentionedUser = message.mentions.users.first();
+    const mentionAuthor = message.author;
+    const mentionAuthorMap = new Map<string, string>();
+    
   
     // 必要なデータが揃っているか確認
     if (!userId || !guildId || !userName) {
@@ -86,15 +71,44 @@ import {
           channel_id: channelId,
         },
       ]);
-  
+      if (mentionedUser) {
+        // メンションしたユーザーのIDを保存
+        mentionAuthorMap.set(message.id, mentionAuthor.id);
+        if (message.channel instanceof TextChannel) {
+          try {
+            const messageLink = `https://discord.com/channels/${message.guild?.id}/${message.channel.id}/${message.id}`;
+    
+            await mentionAuthor.send('まだメッセージを確認していません。メンションされたユーザーが確認するとお知らせします。');
+    
+            const buttonLink = new ButtonBuilder()
+              .setLabel(`メッセージを確認`)
+              .setStyle(ButtonStyle.Link)
+              .setURL(messageLink);
+    
+            const buttonConfirm = new ButtonBuilder()
+              .setCustomId(mentionAuthor.id)
+              .setLabel('確認しました！')
+              .setStyle(ButtonStyle.Primary)
+              .setEmoji('👍');
+    
+            const row = new ActionRowBuilder<ButtonBuilder>().addComponents(buttonLink, buttonConfirm);
+    
+            setTimeout(async () => {
+              try {
+                await mentionedUser.send({
+                  content: `${mentionedUser.username}さん、@ ${mentionAuthor.username}からメッセージが届いています。メッセージを確認してください!`,
+                  components: [row],
+                });
+              } catch (error) {
+                console.error('Failed to send message to the mentioned user:', error);
+              }
+            }, 1 * 1000);
+          } catch (error) {
+            console.error('Error creating button:', error);
+          }}
     if (messageError) {
       console.error('Error saving message to Supabase:', messageError);
     } else {
       console.log('Message added to Supabase:', messageData);
     }
-  });
-  
-    
-  // Discord Botのログイン
-  client.login(process.env.DISCORD_TOKEN);
-  
+  }};

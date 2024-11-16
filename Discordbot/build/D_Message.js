@@ -1,21 +1,9 @@
 "use strict";
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.messageCreateHandler = void 0;
 const discord_js_1 = require("discord.js");
-const supabase_js_1 = require("@supabase/supabase-js");
-const dotenv_1 = __importDefault(require("dotenv"));
-dotenv_1.default.config();
-const supabase = (0, supabase_js_1.createClient)(process.env.SUPABASE_URL, process.env.SUPABASE_API_KEY);
-const client = new discord_js_1.Client({
-    intents: [discord_js_1.GatewayIntentBits.Guilds, discord_js_1.GatewayIntentBits.GuildMessages],
-    partials: [discord_js_1.Partials.Message, discord_js_1.Partials.Channel],
-});
-client.once('ready', () => {
-    console.log(`Logged in as ${client.user?.tag}`);
-});
-client.on(discord_js_1.Events.MessageCreate, async (message) => {
+const useSupabase_1 = require("./hooks/useSupabase");
+const messageCreateHandler = async (message) => {
     if (message.author.bot)
         return;
     const messageId = message.id;
@@ -24,11 +12,14 @@ client.on(discord_js_1.Events.MessageCreate, async (message) => {
     const guildId = message.guild?.id || null;
     const channelId = message.channelId;
     const userName = message.author.username;
+    const mentionedUser = message.mentions.users.first();
+    const mentionAuthor = message.author;
+    const mentionAuthorMap = new Map();
     if (!userId || !guildId || !userName) {
         console.error('Missing user_id, workspace_id, or user_name');
         return;
     }
-    const { data: userData, error: userError } = await supabase
+    const { data: userData, error: userError } = await useSupabase_1.supabase
         .from('D_User')
         .upsert([
         {
@@ -41,7 +32,7 @@ client.on(discord_js_1.Events.MessageCreate, async (message) => {
         console.error('Error saving user to Supabase:', userError);
         return;
     }
-    const { data: userExists, error: userCheckError } = await supabase
+    const { data: userExists, error: userCheckError } = await useSupabase_1.supabase
         .from('D_User')
         .select('user_id')
         .eq('user_id', userId)
@@ -51,7 +42,7 @@ client.on(discord_js_1.Events.MessageCreate, async (message) => {
         console.error('User does not exist in D_User table');
         return;
     }
-    const { data: messageData, error: messageError } = await supabase
+    const { data: messageData, error: messageError } = await useSupabase_1.supabase
         .from('D_Message')
         .insert([
         {
@@ -62,25 +53,44 @@ client.on(discord_js_1.Events.MessageCreate, async (message) => {
             channel_id: channelId,
         },
     ]);
-    if (messageError) {
-        console.error('Error saving message to Supabase:', messageError);
+    if (mentionedUser) {
+        mentionAuthorMap.set(message.id, mentionAuthor.id);
+        if (message.channel instanceof discord_js_1.TextChannel) {
+            try {
+                const messageLink = `https://discord.com/channels/${message.guild?.id}/${message.channel.id}/${message.id}`;
+                await mentionAuthor.send('まだメッセージを確認していません。メンションされたユーザーが確認するとお知らせします。');
+                const buttonLink = new discord_js_1.ButtonBuilder()
+                    .setLabel(`メッセージを確認`)
+                    .setStyle(discord_js_1.ButtonStyle.Link)
+                    .setURL(messageLink);
+                const buttonConfirm = new discord_js_1.ButtonBuilder()
+                    .setCustomId(mentionAuthor.id)
+                    .setLabel('確認しました！')
+                    .setStyle(discord_js_1.ButtonStyle.Primary)
+                    .setEmoji('👍');
+                const row = new discord_js_1.ActionRowBuilder().addComponents(buttonLink, buttonConfirm);
+                setTimeout(async () => {
+                    try {
+                        await mentionedUser.send({
+                            content: `${mentionedUser.username}さん、@ ${mentionAuthor.username}からメッセージが届いています。メッセージを確認してください!`,
+                            components: [row],
+                        });
+                    }
+                    catch (error) {
+                        console.error('Failed to send message to the mentioned user:', error);
+                    }
+                }, 1 * 1000);
+            }
+            catch (error) {
+                console.error('Error creating button:', error);
+            }
+        }
+        if (messageError) {
+            console.error('Error saving message to Supabase:', messageError);
+        }
+        else {
+            console.log('Message added to Supabase:', messageData);
+        }
     }
-    else {
-        console.log('Message added to Supabase:', messageData);
-    }
-});
-client.login(process.env.DISCORD_TOKEN);
-
-// Expressサーバーを作成（Render用）
-const express = require('express'); 
-const app = express();
-const port = process.env.PORT || 3000;
-
-// Renderにポートをリッスンさせる
-app.get('/', (req, res) => {
-    res.send('Discord bot is running.');
-});
-
-app.listen(port, () => {
-    console.log(`Server is listening on port ${port}`);
-});
+};
+exports.messageCreateHandler = messageCreateHandler;
