@@ -9,6 +9,7 @@ import {
 } from "./commands";
 import { handleEmojiChangedEvent, handleMessageEvent, handleReactionAdded } from "./handlers";
 import { RandomQuestionScheduler } from "./schedulers/randomQuestionScheduler";
+import summarizeCommand from "./commands/summarize/summarizeCommand";
 
 (async () => {
   const { slackBot, slackClient, PORT, workspaceId } = await useSlackbot();
@@ -20,6 +21,7 @@ import { RandomQuestionScheduler } from "./schedulers/randomQuestionScheduler";
   questionCommand({ slackBot, slackClient });
   voteCommand({ slackBot, slackClient });
   randomQuestionCommand({ slackBot, slackClient });
+  summarizeCommand(slackBot);
 
   const targetChannelId = "C080L8HGB47";
   const scheduler = new RandomQuestionScheduler(slackClient, targetChannelId);
