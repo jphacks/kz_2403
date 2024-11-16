@@ -137,6 +137,7 @@ Slackに関するあらゆるデータ（メッセージデータ、絵文字デ
 
 4. `handleDecorateModalSubmission`関数によって送信イベントが処理され、装飾されたテキストが任意のチャンネルに生成される。
 
-   <img src="https://github.com/user-attachments/assets/55c364d4-0fd4-4f54-9d6d-70efba1fc784" width="300">
+   <img width="231" alt="decorate2" src="https://github.com/user-attachments/assets/1ef062b7-bb8f-40c5-bee5-c43f77518ff0" width="500">
+
 
 ---
