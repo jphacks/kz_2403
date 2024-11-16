@@ -1,8 +1,19 @@
 "use strict";
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.messageCreateHandler = void 0;
 const discord_js_1 = require("discord.js");
 const useSupabase_1 = require("./hooks/useSupabase");
+const emoji = require("emoji-toolkit");
+const dotenv_1 = __importDefault(require("dotenv"));
+dotenv_1.default.config();
+const fallbackEmojis = ["🤔", "👍", "🥲", "🤣", "😁", "❤️", "🙌", "😀", "👀", "🔥", "😎", "🌟"];
+function getRandomEmojis(emojis, count) {
+    const shuffled = emojis.sort(() => 0.5 - Math.random());
+    return shuffled.slice(0, count);
+}
 const messageCreateHandler = async (message) => {
     if (message.author.bot)
         return;
@@ -15,6 +26,7 @@ const messageCreateHandler = async (message) => {
     const mentionedUser = message.mentions.users.first();
     const mentionAuthor = message.author;
     const mentionAuthorMap = new Map();
+    console.log(message);
     if (!userId || !guildId || !userName) {
         console.error('Missing user_id, workspace_id, or user_name');
         return;
@@ -30,7 +42,6 @@ const messageCreateHandler = async (message) => {
     ], { onConflict: 'user_id,workspace_id' });
     if (userError) {
         console.error('Error saving user to Supabase:', userError);
-        return;
     }
     const { data: userExists, error: userCheckError } = await useSupabase_1.supabase
         .from('D_User')
@@ -40,7 +51,6 @@ const messageCreateHandler = async (message) => {
         .single();
     if (userCheckError || !userExists) {
         console.error('User does not exist in D_User table');
-        return;
     }
     const { data: messageData, error: messageError } = await useSupabase_1.supabase
         .from('D_Message')
@@ -53,6 +63,38 @@ const messageCreateHandler = async (message) => {
             channel_id: channelId,
         },
     ]);
+    const body = {
+        id: messageId,
+        text: messageText,
+        provider: "discord",
+    };
+    try {
+        console.log(body);
+        const res = await fetch(`${process.env.WORKERS_API_URL}/recommend`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify(body),
+        });
+        console.log(res);
+        if (!res.ok) {
+            throw new Error(`API error : ${res.status} ${res.statusText}`);
+        }
+        const data = await res.json();
+        const recommendedReactions = data.recommendReactions.map((reaction) => reaction.emoji);
+        for (const reaction of recommendedReactions) {
+            console.log(emoji.shortnameToUnicode(reaction));
+            message.react(emoji.shortnameToUnicode(reaction));
+        }
+    }
+    catch (error) {
+        console.log;
+        const RandomEmojis = getRandomEmojis(fallbackEmojis, 3);
+        for (const emoji of RandomEmojis) {
+            message.react(emoji);
+        }
+    }
     if (mentionedUser) {
         mentionAuthorMap.set(message.id, mentionAuthor.id);
         if (message.channel instanceof discord_js_1.TextChannel) {

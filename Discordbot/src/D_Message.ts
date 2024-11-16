@@ -6,6 +6,20 @@ import {
     TextChannel,
   } from 'discord.js';
 import { supabase } from './hooks/useSupabase';
+const emoji = require("emoji-toolkit");
+import dotenv from 'dotenv';
+
+dotenv.config();
+
+
+// エラー時に追加する絵文字のセット
+const fallbackEmojis = ["🤔", "👍", "🥲", "🤣", "😁", "❤️", "🙌", "😀", "👀", "🔥", "😎", "🌟"];
+
+// 絵文字をランダムに選択する関数
+function getRandomEmojis(emojis: string[], count: number): string[] {
+  const shuffled = emojis.sort(() => 0.5 - Math.random());
+  return shuffled.slice(0, count);
+}
   
 export const messageCreateHandler= async (message: Message) => {
     // Botのメッセージは無視する
@@ -22,12 +36,14 @@ export const messageCreateHandler= async (message: Message) => {
     const mentionAuthor = message.author;
     const mentionAuthorMap = new Map<string, string>();
     
-  
+    console.log(message)
     // 必要なデータが揃っているか確認
     if (!userId || !guildId || !userName) {
       console.error('Missing user_id, workspace_id, or user_name');
       return;
     }
+
+
   
     // D_Userテーブルにユーザー情報を登録（または更新）
     const { data: userData, error: userError } = await supabase
@@ -43,7 +59,6 @@ export const messageCreateHandler= async (message: Message) => {
   
     if (userError) {
       console.error('Error saving user to Supabase:', userError);
-      return;
     }
   
     // D_Userテーブルにユーザーが存在することを確認
@@ -56,7 +71,6 @@ export const messageCreateHandler= async (message: Message) => {
   
     if (userCheckError || !userExists) {
       console.error('User does not exist in D_User table');
-      return;
     }
   
     // D_Messageテーブルにメッセージを登録
@@ -71,7 +85,45 @@ export const messageCreateHandler= async (message: Message) => {
           channel_id: channelId,
         },
       ]);
-      if (mentionedUser) {
+
+      const body = {
+        id: messageId,
+        text: messageText,
+        provider: "discord",
+      }
+
+      try {
+        console.log(body)
+        const res = await fetch(`${process.env.WORKERS_API_URL}/recommend`,{
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify(body),
+          }
+      );
+      console.log(res)
+      
+        if (!res.ok){
+          throw new Error(`API error : ${res.status} ${res.statusText}`);
+        }
+ 
+        const data = await res.json();
+        const recommendedReactions = data.recommendReactions.map((reaction: { emoji: string }) => reaction.emoji);
+        for(const reaction of recommendedReactions){
+         console.log(emoji.shortnameToUnicode(reaction))
+          message.react(emoji.shortnameToUnicode(reaction))
+        }
+
+      } catch (error) {
+        console.log
+        const RandomEmojis = getRandomEmojis(fallbackEmojis,3);
+        for (const emoji of RandomEmojis){
+          message.react(emoji)
+        }
+      }
+        
+        if (mentionedUser) {
         // メンションしたユーザーのIDを保存
         mentionAuthorMap.set(message.id, mentionAuthor.id);
         if (message.channel instanceof TextChannel) {

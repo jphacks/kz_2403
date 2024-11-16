@@ -10,7 +10,6 @@ useDiscord_1.client.on(discord_js_1.Events.MessageReactionAdd, D_Emoji_1.message
 useDiscord_1.client.on(discord_js_1.Events.MessageCreate, D_Message_1.messageCreateHandler);
 useDiscord_1.client.on(discord_js_1.Events.MessageReactionRemove, D_Reaction_1.messageReactionRemoveHandler);
 useDiscord_1.client.on(discord_js_1.Events.InteractionCreate, remind_1.interactionCreateHandler);
-
 // Expressサーバーを作成（Render用）
 const express = require('express'); 
 const app = express();

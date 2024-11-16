@@ -8,7 +8,7 @@ const discord_js_1 = require("discord.js");
 const dotenv_1 = __importDefault(require("dotenv"));
 dotenv_1.default.config();
 const client = new discord_js_1.Client({
-    intents: [discord_js_1.GatewayIntentBits.Guilds, discord_js_1.GatewayIntentBits.GuildMessages, discord_js_1.GatewayIntentBits.GuildMessageReactions],
+    intents: [discord_js_1.GatewayIntentBits.Guilds, discord_js_1.GatewayIntentBits.GuildMessages, discord_js_1.GatewayIntentBits.GuildMessageReactions, discord_js_1.GatewayIntentBits.MessageContent],
     partials: [discord_js_1.Partials.Message, discord_js_1.Partials.Channel, discord_js_1.Partials.Reaction],
 });
 exports.client = client;
