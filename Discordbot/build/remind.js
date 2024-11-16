@@ -66,17 +66,3 @@ client.on('interactionCreate', async (interaction) => {
     await interaction.message.delete();
 });
 client.login(process.env.DISCORD_TOKEN);
-
-// Expressサーバーを作成（Render用）
-const express = require('express'); 
-const app = express();
-const port = process.env.PORT || 3000;
-
-// Renderにポートをリッスンさせる
-app.get('/', (req, res) => {
-    res.send('Discord bot is running.');
-});
-
-app.listen(port, () => {
-    console.log(`Server is listening on port ${port}`);
-});

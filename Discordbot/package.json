@@ -3,8 +3,8 @@
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
-    "start": "node ./build/rireki.js",
-    "debug": "ts-node ./src/rireki.ts",
+    "start": "node ./build/D_Message.js",
+    "debug": "ts-node ./src/D_Message.ts",
     "compile": "tsc -p .",
     "compile:test": "tsc -p . --noEmit"
   },
@@ -19,6 +19,7 @@
     "typescript": "^5.6.3"
   },
   "dependencies": {
+    "@supabase/supabase-js": "^2.46.1",
     "discord.js": "^14.16.3",
     "dotenv": "^16.4.5",
     "express": "^4.21.1",
