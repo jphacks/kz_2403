@@ -3,8 +3,8 @@
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
-    "start": "node ./build/D_Message.js",
-    "debug": "ts-node ./src/D_Message.ts",
+    "start": "node ./build/D_Emoji.js",
+    "debug": "ts-node ./src/D_Emoji.ts",
     "compile": "tsc -p .",
     "compile:test": "tsc -p . --noEmit"
   },
@@ -22,6 +22,7 @@
     "@supabase/supabase-js": "^2.46.1",
     "discord.js": "^14.16.3",
     "dotenv": "^16.4.5",
+    "emoji-toolkit": "^9.0.1",
     "express": "^4.21.1",
     "node-emoji": "^2.1.3"
   }

@@ -6,7 +6,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const discord_js_1 = require("discord.js");
 const supabase_js_1 = require("@supabase/supabase-js");
 const dotenv_1 = __importDefault(require("dotenv"));
-const emoji = require('node-emoji');
+const emoji = require('emoji-toolkit');
 dotenv_1.default.config();
 const supabase = (0, supabase_js_1.createClient)(process.env.SUPABASE_URL, process.env.SUPABASE_API_KEY);
 const client = new discord_js_1.Client({
@@ -27,7 +27,7 @@ client.on(discord_js_1.Events.MessageReactionAdd, async (reaction, user) => {
             return;
         }
     }
-    const emojiName = emoji.which(`${reaction.emoji.name}`) || reaction.emoji.name;
+    const emojiName = emoji.toShort(`${reaction.emoji.name}`) || reaction.emoji.name;
     const guildId = reaction.message.guild?.id || null;
     const { data, error } = await supabase.from(tableName).insert([
         {
@@ -44,3 +44,17 @@ client.on(discord_js_1.Events.MessageReactionAdd, async (reaction, user) => {
     }
 });
 client.login(process.env.DISCORD_TOKEN);
+
+// Expressサーバーを作成（Render用）
+const express = require('express'); 
+const app = express();
+const port = process.env.PORT || 3000;
+
+// Renderにポートをリッスンさせる
+app.get('/', (req, res) => {
+    res.send('Discord bot is running.');
+});
+
+app.listen(port, () => {
+    console.log(`Server is listening on port ${port}`);
+});

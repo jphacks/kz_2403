@@ -10,7 +10,6 @@ import {
 } from 'discord.js';
 import { createClient } from '@supabase/supabase-js';
 import dotenv from 'dotenv';
-const emoji = require('node-emoji');
 
 dotenv.config();
 
@@ -29,9 +28,47 @@ client.once('ready', () => {
   console.log(`Logged in as ${client.user?.tag}`);
 });
 
-// 登録先の任意のテーブル名
-const tableName = 'D_Reaction'; // 作成したテーブル名に置き換えてください
+// 登録先のテーブル名
+const userTable = 'D_User';
 
+// ユーザーのポイントを加算または減算
+const updateUserPoints = async (userId: string, increment: number) => {
+  try {
+    const { data, error: fetchError } = await supabase
+      .from(userTable)
+      .select('total_point')
+      .eq('user_id', userId)
+      .single();
+
+    if (fetchError) {
+      console.error('Error fetching user data:', fetchError);
+      return;
+    }
+
+    if (!data) {
+      console.error(`No data found for user_id "${userId}"`);
+      return;
+    }
+
+    const currentTotalPoints = data.total_point;
+    const updatedTotalPoints = currentTotalPoints + increment;
+
+    const { error: updateError } = await supabase
+      .from(userTable)
+      .update({ total_point: updatedTotalPoints })
+      .eq('user_id', userId);
+
+    if (updateError) {
+      console.error('Error updating user points:', updateError);
+    } else {
+      console.log(`User points updated successfully for user_id "${userId}": ${updatedTotalPoints}`);
+    }
+  } catch (err) {
+    console.error('Unexpected error updating user points:', err);
+  }
+};
+
+// Reaction追加時の処理
 client.on(Events.MessageReactionAdd, async (reaction: MessageReaction | PartialMessageReaction, user: User | PartialUser) => {
   if (reaction.partial) {
     try {
@@ -42,30 +79,13 @@ client.on(Events.MessageReactionAdd, async (reaction: MessageReaction | PartialM
     }
   }
 
-  const emojiName = emoji.which(`${reaction.emoji.name}`) || reaction.emoji.name;
-  const guildId = reaction.message.guild?.id || null; // サーバーIDを取得
-  const messageId = reaction.message.id; // メッセージIDを取得
-  const userId = user.id; // ユーザーIDを取得
-  const reactionId = reaction.emoji.id || reaction.emoji.name; // 絵文字IDを取得
+  const userId = user.id;
 
-  // Supabaseにデータを登録
-  const { data, error } = await supabase.from(tableName).insert([
-    {
-      emoji_id: emojiName,     // 絵文字ID
-      workspace_id: guildId,   // DiscordサーバーID
-      message_id: messageId,   // メッセージID
-      user_id: userId,         // ユーザーID
-      reaction_id: reactionId, // 反応ID
-    },
-  ]);
-
-  if (error) {
-    console.error('Error saving reaction to Supabase:', error);
-  } else {
-    console.log('Reaction added to Supabase:', data);
-  }
+  // ポイントを1加算
+  await updateUserPoints(userId, 1);
 });
 
+// Reaction削除時の処理
 client.on(Events.MessageReactionRemove, async (reaction: MessageReaction | PartialMessageReaction, user: User | PartialUser) => {
   if (reaction.partial) {
     try {
@@ -76,20 +96,10 @@ client.on(Events.MessageReactionRemove, async (reaction: MessageReaction | Parti
     }
   }
 
-  const emojiName = emoji.which(`${reaction.emoji.name}`) || reaction.emoji.name;
-  const guildId = reaction.message.guild?.id || null; // サーバーIDを取得
-  const messageId = reaction.message.id; // メッセージIDを取得
-  const userId = user.id; // ユーザーIDを取得
-  const reactionId = reaction.emoji.id || reaction.emoji.name; // 絵文字IDを取得
+  const userId = user.id;
 
-  // Supabaseにデータを削除
-  const { data, error } = await supabase.from(tableName).delete().eq('message_id', messageId).eq('user_id', userId).eq('reaction_id', reactionId);
-
-  if (error) {
-    console.error('Error removing reaction from Supabase:', error);
-  } else {
-    console.log('Reaction removed from Supabase:', data);
-  }
+  // ポイントを1減算
+  await updateUserPoints(userId, -1);
 });
 
 // Discord Botのログイン

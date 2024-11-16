@@ -78,3 +78,4 @@ client.on(discord_js_1.Events.InteractionCreate, async (interaction) => {
     }
 });
 client.login(process.env.DISCORD_TOKEN);
+

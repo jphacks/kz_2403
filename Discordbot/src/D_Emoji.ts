@@ -10,7 +10,7 @@ import {
   } from 'discord.js';
   import { createClient } from '@supabase/supabase-js';
   import dotenv from 'dotenv';
-  const emoji = require('node-emoji');
+  const emoji = require('emoji-toolkit');
   
   dotenv.config();
   
@@ -46,7 +46,7 @@ import {
       }
   
       // 絵文字名（カスタム絵文字またはUnicode絵文字の区別）
-      const emojiName = emoji.which(`${reaction.emoji.name}`) || reaction.emoji.name;
+      const emojiName = emoji.toShort(`${reaction.emoji.name}`) || reaction.emoji.name;
       const guildId = reaction.message.guild?.id || null; // サーバーIDを取得
   
       // Supabaseにデータを登録
