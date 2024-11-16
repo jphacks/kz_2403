@@ -101,7 +101,8 @@ app.put("/emoji/generate-label", async (c) => {
     .map((label) => label.description)
     .join(" ");
 
-  const inputs = `${formattedText} ${formattedLabels}`;
+  // 文字認識の結果があればそれを採用し、なければ画像認識のラベルを採用する
+  const inputs = formattedText ?? formattedLabels;
 
   const body = JSON.stringify({ inputs: inputs });
   
