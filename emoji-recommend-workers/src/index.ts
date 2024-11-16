@@ -1,4 +1,3 @@
-import type { GoogleKey } from "cloudflare-workers-and-google-oauth";
 import { Hono } from "hono";
 import type { StatusCode } from "hono/utils/http-status";
 import { VisionAIClient } from "./services/vision";
@@ -69,10 +68,12 @@ app.delete("/emoji", async (c) => {
 })
 
 app.put("/emoji/generate-label", async (c) => {
-  const { name, imageUrl } = await c.req.json<{
+  const { name, imageUrl, provider } = await c.req.json<{
     name: string;
     imageUrl: string;
+    provider?: string;
   }>();
+
   if (!name || !imageUrl) {
     return c.json({ error: "Bad Request: name or imageUrl is not defined" }, 400);
   }
@@ -115,8 +116,10 @@ app.put("/emoji/generate-label", async (c) => {
 
   const embedded: number[] = await response.json();
 
+  const nameSpace = provider ? `${provider}-emoji` : "emoji";
+
   await c.env.VECTORIZE.insert([
-    { id: `emoji-${name}`, values: embedded, namespace: "emoji", metadata: { name: name } },
+    { id: `emoji-${name}`, values: embedded, namespace: nameSpace, metadata: { name: name } },
   ]);
 
   return c.json({ data: { id, embedded, label: inputs } }, 201);
@@ -125,13 +128,15 @@ app.put("/emoji/generate-label", async (c) => {
 app.post("/recommend", async (c) => {
   try {
     // { id: 投稿ID, text: 投稿内容 }
-    const { id, text } = await c.req.json<{ id: string; text: string }>();
+    const { id, text, provider } = await c.req.json<{ id: string; text: string, provider?: string }>();
     if (!text) {
       return c.json({ error: "Bad Request: text is not defined" }, 400);
     }
 
     // 文章内のURLを置換
     const replacedText = text.replace(/https?:\/\/\S+/g, "<<URL>>");
+
+    const nameSpace = provider ? `${provider}-emoji` : "emoji";
 
     const body = JSON.stringify({
       inputs: replacedText,
@@ -160,7 +165,7 @@ app.post("/recommend", async (c) => {
     // emojiとの類似度を計算
     const result = await c.env.VECTORIZE.query(embedded, {
       topK: 3,
-      namespace: "emoji",
+      namespace: nameSpace,
       returnMetadata: "all",
     });
 
