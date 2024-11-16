@@ -16,18 +16,27 @@ export const handleDecorateModalSubmission = async ({
   }
   const style = view.state.values.style_selection.style.selected_option?.value;
   const channelId = channelMap.get(body.user.id);
+  const userId = body.user.id;  // ユーザーIDを取得
+
   if (!channelId) {
     console.error("チャンネルIDが見つかりません");
     return;
   }
+
   try {
     let blocks: (Block | KnownBlock)[];
     if (style === "sudden_death") {
-      // 既存の突然の死スタイル
       const lengthFactor = Math.max(5, Math.ceil(text.length / 2));
       const peopleString = "人".repeat(lengthFactor);
       const yString = "Y^".repeat(lengthFactor);
       blocks = [
+        {
+          type: "section",
+          text: {
+            type: "mrkdwn",
+            text: `<@${userId}>`,
+          }
+        },
         {
           type: "header",
           text: {
@@ -51,8 +60,14 @@ export const handleDecorateModalSubmission = async ({
         },
       ];
     } else if (style === "simple_decor") {
-      // シンプル装飾
       blocks = [
+        {
+          type: "section",
+          text: {
+            type: "mrkdwn",
+            text: `<@${userId}>`,
+          }
+        },
         {
           type: "header",
           text: {
@@ -62,8 +77,14 @@ export const handleDecorateModalSubmission = async ({
         },
       ];
     } else if (style === "star_border") {
-      // 新しい星囲みスタイル
       blocks = [
+        {
+          type: "section",
+          text: {
+            type: "mrkdwn",
+            text: `<@${userId}>`,
+          }
+        },
         {
           type: "header",
           text: {
@@ -73,8 +94,14 @@ export const handleDecorateModalSubmission = async ({
         },
       ];
     } else if (style === "speech_bubble") {
-      // 新しい吹き出しスタイル
       blocks = [
+        {
+          type: "section",
+          text: {
+            type: "mrkdwn",
+            text: `<@${userId}>`,
+          }
+        },
         {
           type: "header",
           text: {
@@ -84,8 +111,14 @@ export const handleDecorateModalSubmission = async ({
         },
       ];
     } else {
-      // デフォルトの装飾なし
       blocks = [
+        {
+          type: "section",
+          text: {
+            type: "mrkdwn",
+            text: `<@${userId}>`,
+          }
+        },
         {
           type: "header",
           text: {
