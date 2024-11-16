@@ -89,8 +89,7 @@ const messageCreateHandler = async (message) => {
         }
     }
     catch (error) {
-        console.log;
-        const RandomEmojis = getRandomEmojis(fallbackEmojis, 3);
+        const RandomEmojis = getRandomEmojis(fallbackEmojis, 1);
         for (const emoji of RandomEmojis) {
             message.react(emoji);
         }

@@ -5,6 +5,7 @@ import { messageCreateHandler } from "./D_Message";
 import { messageReactionRemoveHandler } from "./D_Reaction";
 import { interactionCreateHandler } from "./remind";
 
+
 client.on(Events.MessageReactionAdd, messageReactionAddHandler);
 client.on(Events.MessageCreate, messageCreateHandler);
 client.on(Events.MessageReactionRemove, messageReactionRemoveHandler);

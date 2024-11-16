@@ -1,7 +1,7 @@
 import { client } from "./hooks/useDiscord";
 
 // ボタンが押された時に実行される
-export const interactionCreateHandler = async (interaction: any) => {
+export const interactionCreateHandler = async (interaction:any) => {
   if (!interaction.isButton()) return;
 
     try {

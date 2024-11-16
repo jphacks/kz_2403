@@ -110,13 +110,14 @@ export const messageCreateHandler= async (message: Message) => {
  
         const data = await res.json();
         const recommendedReactions = data.recommendReactions.map((reaction: { emoji: string }) => reaction.emoji);
+
         for(const reaction of recommendedReactions){
          console.log(emoji.shortnameToUnicode(reaction))
           message.react(emoji.shortnameToUnicode(reaction))
         }
+        
 
       } catch (error) {
-        console.log
         const RandomEmojis = getRandomEmojis(fallbackEmojis,3);
         for (const emoji of RandomEmojis){
           message.react(emoji)
