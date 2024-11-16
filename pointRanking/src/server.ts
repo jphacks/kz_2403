@@ -5,6 +5,7 @@ import {
   questionCommand,
   randomQuestionCommand,
   rankingCommand,
+  summarizeThreadCommand,
   voteCommand,
 } from "./commands";
 import { handleEmojiChangedEvent, handleMessageEvent, handleReactionAdded } from "./handlers";
@@ -22,6 +23,7 @@ import summarizeCommand from "./commands/summarize/summarizeCommand";
   voteCommand({ slackBot, slackClient });
   randomQuestionCommand({ slackBot, slackClient });
   summarizeCommand(slackBot);
+  summarizeThreadCommand(slackBot);
 
   const targetChannelId = "C080L8HGB47";
   const scheduler = new RandomQuestionScheduler(slackClient, targetChannelId);

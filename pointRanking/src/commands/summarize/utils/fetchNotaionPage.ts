@@ -9,7 +9,7 @@ export async function fetchNotionPage(pageUrl: string): Promise<string> {
     const rawPageId = match?.[0];
 
     if (!rawPageId) {
-      throw new Error("Invalid Notion page URL");
+      throw new Error(`NotionのURLがありません: ${pageUrl}`);
     }
 
     // ページIDをUUID形式に変換（必要な場合のみ）
@@ -22,7 +22,7 @@ export async function fetchNotionPage(pageUrl: string): Promise<string> {
           );
 
     if (!pageId.match(/[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}/)) {
-      throw new Error("Extracted ID is not a valid UUID");
+      throw new Error(`${pageId}`);
     }
 
     // ページの全ブロックを取得
@@ -45,14 +45,14 @@ export async function fetchNotionPage(pageUrl: string): Promise<string> {
       .join("\n");
 
     if (!content) {
-      throw new Error("No content found in the page");
+      throw new Error(`ページ内にコンテンツがありません。: ${pageUrl}`);
     }
 
     return content;
   } catch (error) {
     if (error instanceof Error) {
-      throw new Error(`Failed to fetch Notion page: ${error.message}`);
+      throw new Error(`${error.message}`);
     }
-    throw new Error("Failed to fetch Notion page");
+    throw new Error(`${pageUrl}`);
   }
 }
