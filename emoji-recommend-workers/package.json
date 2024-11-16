@@ -5,6 +5,7 @@
     "deploy": "wrangler deploy --minify"
   },
   "dependencies": {
+    "cloudflare-workers-and-google-oauth": "^2.0.0",
     "hono": "^4.6.6"
   },
   "devDependencies": {

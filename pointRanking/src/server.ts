@@ -7,7 +7,7 @@ import {
   rankingCommand,
   voteCommand,
 } from "./commands";
-import { handleMessageEvent, handleReactionAdded } from "./handlers";
+import { handleEmojiChangedEvent, handleMessageEvent, handleReactionAdded } from "./handlers";
 import { RandomQuestionScheduler } from "./schedulers/randomQuestionScheduler";
 
 (async () => {
@@ -32,6 +32,10 @@ import { RandomQuestionScheduler } from "./schedulers/randomQuestionScheduler";
 
   slackBot.event("message", async ({ event, client }) => {
     await handleMessageEvent(event, serviceRoleKey, workspaceId, client);
+  });
+
+  slackBot.event("emoji_changed", async ({ event, client }) => {
+    await handleEmojiChangedEvent(event, client, workspaceId);
   });
 
   // サーバーの起動
