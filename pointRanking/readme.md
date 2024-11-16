@@ -2,6 +2,8 @@
 
 Slackに関するあらゆるデータ（メッセージデータ、絵文字データ、ユーザーデータなど）を保存し、各種スラッシュコマンドを実装。
 
+---
+
 ## ポイントランキング
 
 ### 概要
@@ -11,34 +13,42 @@ Slackに関するあらゆるデータ（メッセージデータ、絵文字デ
 ### 流れ
 
 1. **データ保存**
-    - Slack APIがユーザーのリアクション（メッセージや絵文字）を受け取り、Slackbotがそれに応じてSupabaseに各種データを保存するイベントを送信。
-        
-        > 💡 エラーが起きないように、各種操作の前にテーブル内の依存関係に問題がないか確認を行う。
-        > 
-    - その後、以下の条件でポイントを`userNew`テーブルに保存。
-        - 絵文字を押した順番が1番の人に3ポイント、2番目の人に2ポイント、3番目以降の人に1ポイントを付与
-        - 送信後、5分以内に絵文字を押した人に1ポイントを付与
-        - メンション（`@〇〇`）を使用した人に1ポイントを付与
-        - 特定のキーワードを使用した人に1ポイントを付与
-        
-        > 💡 注意: メッセージ毎に付与するポイントは一度だけにしたいため、ensureHasUserReactedBeforeで確認して重複を防ぐ。
-        > 
-    - Supabaseを採用しているため、リアルタイムでデータが更新する。
+   - Slack APIがユーザーのリアクション（メッセージや絵文字）を受け取り、Slackbotがそれに応じてSupabaseに各種データを保存するイベントを送信。
+
+     > 💡 **エラー防止:** 各種操作の前にテーブル内の依存関係に問題がないか確認を行う。
+
+   - その後、以下の条件でポイントを`userNew`テーブルに保存。
+     - 絵文字を押した順番が1番の人に3ポイント、2番目の人に2ポイント、3番目以降の人に1ポイントを付与
+     - 送信後、5分以内に絵文字を押した人に1ポイントを付与
+     - メンション（`@〇〇`）を使用した人に1ポイントを付与
+     - 特定のキーワードを使用した人に1ポイントを付与
+
+     > 💡 **注意:** メッセージ毎に付与するポイントは一度だけにしたいため、`ensureHasUserReactedBefore`で確認して重複を防ぐ。
+
+   - Supabaseを採用しているため、リアルタイムでデータが更新される。
+
 2. **データ表示**
-    - 以下の方法で、現在のポイント取得状況を確認。
-        - `ranking`コマンドを入力<br>
-          <img width="538" alt="ranking_1" src="https://github.com/user-attachments/assets/100270d3-0572-42cd-8490-64af751169e5">
+   - 以下の方法で、現在のポイント取得状況を確認。
+     - `ranking`コマンドを入力
 
-            - 全体ランキング<br>
-              <img width="437" alt="ranking_2" src="https://github.com/user-attachments/assets/a7f9b3ea-994a-4297-b781-a4d1e02f2b3a">
-            - 月別ランキング<br> 
-              <img width="441" alt="ranking_3" src="https://github.com/user-attachments/assets/2285f3cc-68f6-46d0-b0b2-55e02cee0b96">
-            - 個人ポイント<br> 
-              <img width="154" alt="ranking_4" src="https://github.com/user-attachments/assets/32506f09-0607-40d2-b101-1e3980d8af70">
+       <img src="https://github.com/user-attachments/assets/100270d3-0572-42cd-8490-64af751169e5" width="400">
 
-        - 月末実行
-            - Cloudflare Workersで月別ランキングを月末に実行
-    - これにより、任意のチャンネルでランキングを表示することができる。
+       - **全体ランキング**
+
+         <img src="https://github.com/user-attachments/assets/a7f9b3ea-994a-4297-b781-a4d1e02f2b3a" width="400">
+       - **月別ランキング**
+
+         <img src="https://github.com/user-attachments/assets/2285f3cc-68f6-46d0-b0b2-55e02cee0b96" width="400">
+       - **個人ポイント**
+
+         <img src="https://github.com/user-attachments/assets/32506f09-0607-40d2-b101-1e3980d8af70" width="200">
+
+     - **月末実行**
+       - Cloudflare Workersで月別ランキングを月末に実行
+
+   - これにより、任意のチャンネルでランキングを表示することができる。
+
+---
 
 ## ランダム質問
 
@@ -53,6 +63,8 @@ Slackに関するあらゆるデータ（メッセージデータ、絵文字デ
 1. `randomQuestionScheduler.ts`が定期的に`sendRandomQuestion`を呼び出し、ユーザーに対して`question.json`からランダムな質問を送信。
 2. ユーザーがDMで質問に回答すると、`modalHandler.ts`が回答を処理し、回答内容が指定されたチャンネルに送信される。回答後、ユーザーにはDMで感謝のメッセージが届く。
 
+---
+
 ## 質問投稿機能
 
 ### 概要
@@ -61,20 +73,25 @@ Slackに関するあらゆるデータ（メッセージデータ、絵文字デ
 
 ### 流れ
 
-1. ユーザーが`/question`コマンドを入力すると、ハンドラーがコマンドを受け取り質問モーダルを開く。<br>
-<img width="527" alt="question_1" src="https://github.com/user-attachments/assets/9deb9600-1123-4be8-80c8-ce29994f1e18">
+1. ユーザーが`/question`コマンドを入力すると、ハンドラーがコマンドを受け取り質問モーダルを開く。
 
-2. ユーザーが質問内容と必要に応じて画像を入力・アップロードし、投稿ボタンを押す。<br>
-<img width="512" alt="question_2" src="https://github.com/user-attachments/assets/3c791b05-dce8-4fc8-bcbf-0a3a1cd5277f">
-   
-3. `handleQuestionAnswerSubmission`ハンドラーがモーダルの送信イベントを受け取り、入力された質問と画像URLを取得し、指定されたチャンネルにメンション付きで投稿される。<br>
-<img width="749" alt="question_3" src="https://github.com/user-attachments/assets/00431d60-6de2-4e0d-9e9d-1200325a9aa6">
+   <img src="https://github.com/user-attachments/assets/9deb9600-1123-4be8-80c8-ce29994f1e18" width="500">
 
-4. 「回答する」ボタンを押すと、回答モーダルが開き、送信ボタンを押すことで質問と同様の流れで返信が投稿される。<br>
-<img width="516" alt="スクリーンショット 2024-11-16 14 10 47" src="https://github.com/user-attachments/assets/d2ae4b19-8682-4a62-a0e2-96da024275e9"> <br>
-<img width="299" alt="question_5" src="https://github.com/user-attachments/assets/aec700ee-9fc4-45ac-9b1b-bfc8ed7dacfb">
+2. ユーザーが質問内容と必要に応じて画像を入力・アップロードし、投稿ボタンを押す。
 
+   <img src="https://github.com/user-attachments/assets/3c791b05-dce8-4fc8-bcbf-0a3a1cd5277f" width="500">
 
+3. `handleQuestionAnswerSubmission`ハンドラーがモーダルの送信イベントを受け取り、入力された質問と画像URLを取得し、指定されたチャンネルにメンション付きで投稿される。
+
+   <img src="https://github.com/user-attachments/assets/00431d60-6de2-4e0d-9e9d-1200325a9aa6" width="600">
+
+4. 「回答する」ボタンを押すと、回答モーダルが開き、送信ボタンを押すことで質問と同様の流れで返信が投稿される。
+
+   <img src="https://github.com/user-attachments/assets/d2ae4b19-8682-4a62-a0e2-96da024275e9" width="500">
+
+   <img src="https://github.com/user-attachments/assets/aec700ee-9fc4-45ac-9b1b-bfc8ed7dacfb" width="300">
+
+---
 
 ## 投票機能
 
@@ -84,20 +101,25 @@ Slackに関するあらゆるデータ（メッセージデータ、絵文字デ
 
 ### 流れ
 
-1. ユーザーが`/vote`コマンドを入力すると、ハンドラーがコマンドを受け取り投票設定モーダルを開く。<br>
+1. ユーザーが`/vote`コマンドを入力すると、ハンドラーがコマンドを受け取り投票設定モーダルを開く。
 
-2. モーダルには投票の質問、選択肢、画像をアップロードするフィールド、終了日時を選択するフィールドが含まれており、入力後に送信ボタンを押す。<br>
-<img width="510" alt="vote_1_1" src="https://github.com/user-attachments/assets/82b81f54-82c1-4420-8c7d-5f7a70833d7d"> <br>
+2. モーダルには投票の質問、選択肢、画像をアップロードするフィールド、終了日時を選択するフィールドが含まれており、入力後に送信ボタンを押す。
 
-3. `handleVoteModalSubmission`関数がモーダルの送信イベントを処理し、投票メッセージのブロックを作成後、任意のチャンネルに投票の質問が投稿される。また、投票終了時刻に合わせてタイマーがセットされる。<br>
-<img width="544" alt="vote_2_1" src="https://github.com/user-attachments/assets/2fb400e9-0e04-40a5-960c-fcb28d5755fa"><br>
+   <img src="https://github.com/user-attachments/assets/82b81f54-82c1-4420-8c7d-5f7a70833d7d" width="500">
 
-4. ユーザーが投票すると、`handleVote`関数が呼び出され、投票データが更新される。投票が更新されると、メッセージがリアルタイムで更新され、現在の投票結果が反映される。<br>
-<img width="543" alt="vote_2_2" src="https://github.com/user-attachments/assets/21e76746-7c58-480c-a267-7ae401a3ff76"><br>
+3. `handleVoteModalSubmission`関数がモーダルの送信イベントを処理し、投票メッセージのブロックを作成後、任意のチャンネルに投票の質問が投稿される。また、投票終了時刻に合わせてタイマーがセットされる。
 
-5. 指定された時間になると、タイマーが終了し、最終結果が表示される。<br>
-<img width="535" alt="vote_3" src="https://github.com/user-attachments/assets/e774bffc-9bc9-405c-986e-3f7aa24d3bca"><br>
+   <img src="https://github.com/user-attachments/assets/2fb400e9-0e04-40a5-960c-fcb28d5755fa" width="500">
 
+4. ユーザーが投票すると、`handleVote`関数が呼び出され、投票データが更新される。投票が更新されると、メッセージがリアルタイムで更新され、現在の投票結果が反映される。
+
+   <img src="https://github.com/user-attachments/assets/21e76746-7c58-480c-a267-7ae401a3ff76" width="500">
+
+5. 指定された時間になると、タイマーが終了し、最終結果が表示される。
+
+   <img src="https://github.com/user-attachments/assets/e774bffc-9bc9-405c-986e-3f7aa24d3bca" width="500">
+
+---
 
 ## 文字装飾機能
 
@@ -109,5 +131,12 @@ Slackに関するあらゆるデータ（メッセージデータ、絵文字デ
 
 1. ユーザーがSlackで`/decorate`コマンドを入力する。
 2. `decorateCommand.ts`のハンドラーがこのコマンドを受け取り、装飾設定モーダルを開く。
-3. モーダルには装飾するテキストを入力するフィールドと、装飾スタイルを選択するセクションが含まれており、テキストを入力し、スタイルを選択される。
+3. モーダルには装飾するテキストを入力するフィールドと、装飾スタイルを選択するセクションが含まれており、テキストを入力し、スタイルを選択する。
+
+   <img src="https://github.com/user-attachments/assets/1291ccec-a4e9-4385-8267-9147ca1e7ce9" width="500">
+
 4. `handleDecorateModalSubmission`関数によって送信イベントが処理され、装飾されたテキストが任意のチャンネルに生成される。
+
+   <img src="https://github.com/user-attachments/assets/55c364d4-0fd4-4f54-9d6d-70efba1fc784" width="300">
+
+---
