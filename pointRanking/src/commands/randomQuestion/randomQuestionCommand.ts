@@ -2,11 +2,15 @@ import {
   SlackActionMiddlewareArgs,
   BlockAction,
   ViewSubmitAction,
+  SlackCommandMiddlewareArgs,
 } from "@slack/bolt";
 import { WebClient } from "@slack/web-api";
 import { SlackCommandProps } from "../command";
 import { questionStore } from "./utils/questionStore";
 import { handleQuestionAnswerSubmission } from "./handlers/modalHandler";
+import { sendRandomQuestion } from "./handlers/questionHandler";
+
+const TARGET_CHANNEL_ID = "C080L8HGB47"; // 固定するチャンネルID
 
 export default function randomQuestionCommand({ slackBot }: SlackCommandProps) {
   // 回答ボタンのハンドラー
@@ -74,4 +78,26 @@ export default function randomQuestionCommand({ slackBot }: SlackCommandProps) {
   slackBot.view<ViewSubmitAction>("answer_modal", async (args) => {
     await handleQuestionAnswerSubmission(args);
   });
+
+  // /random_question コマンドハンドラー
+  slackBot.command(
+    "/random_question",
+    async ({
+      command,
+      ack,
+      client,
+    }: SlackCommandMiddlewareArgs & { client: WebClient }) => {
+      await ack();
+
+      try {
+        await sendRandomQuestion(client, TARGET_CHANNEL_ID);
+      } catch (error) {
+        console.error("ランダム質問の送信に失敗しました:", error);
+        await client.chat.postMessage({
+          channel: TARGET_CHANNEL_ID,
+          text: "ランダム質問の送信に失敗しました。もう一度お試しください。",
+        });
+      }
+    }
+  );
 }

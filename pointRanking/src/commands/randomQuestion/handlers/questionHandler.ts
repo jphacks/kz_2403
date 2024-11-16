@@ -47,6 +47,9 @@ export async function sendRandomQuestion(client: WebClient, channelId: string) {
       endTime,
       isAnswered: false,
     });
+
+
+    console.log(`ランダム質問を送信しました: ユーザーID: ${targetUser.id}, ユーザー名: ${targetUser.name}`);
   } catch (error) {
     console.error("ランダム質問の送信に失敗しました:", error);
     throw error;
