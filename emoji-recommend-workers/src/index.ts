@@ -22,10 +22,11 @@ app.get("/ping", (c) => {
 
 app.put("/add-emoji", async (c) => {
   // example: { emoji: "ultrafast-parrot", context: "テンションが高い 楽しい 嬉しい" }
-  const { id, emoji, context } = await c.req.json<{
+  const { id, emoji, context, provider } = await c.req.json<{
     id: string;
     emoji: string;
     context: string;
+    provider? : string;
   }>();
 
   const body = JSON.stringify({ inputs: context });
@@ -44,8 +45,10 @@ app.put("/add-emoji", async (c) => {
 
   const embedded: number[] = await response.json();
 
+  const namespace = provider ? `emoji-${provider}` : "emoji";
+
   await c.env.VECTORIZE.insert([
-    { id: id, values: embedded, namespace: "emoji", metadata: { name: emoji } },
+    { id: id, values: embedded, namespace: namespace, metadata: { name: emoji } },
   ]);
 
   return c.json({ data: { id, embedded: embedded } }, 201);
@@ -116,10 +119,10 @@ app.put("/emoji/generate-label", async (c) => {
 
   const embedded: number[] = await response.json();
 
-  const nameSpace = provider ? `${provider}-emoji` : "emoji";
+  const namespace = provider ? `emoji-${provider}` : "emoji";
 
   await c.env.VECTORIZE.insert([
-    { id: `emoji-${name}`, values: embedded, namespace: nameSpace, metadata: { name: name } },
+    { id: `emoji-${name}`, values: embedded, namespace: namespace, metadata: { name: name } },
   ]);
 
   return c.json({ data: { id, embedded, label: inputs } }, 201);
@@ -136,7 +139,7 @@ app.post("/recommend", async (c) => {
     // 文章内のURLを置換
     const replacedText = text.replace(/https?:\/\/\S+/g, "<<URL>>");
 
-    const nameSpace = provider ? `${provider}-emoji` : "emoji";
+    const namespace = provider ? `emoji-${provider}` : "emoji";
 
     const body = JSON.stringify({
       inputs: replacedText,
@@ -165,7 +168,7 @@ app.post("/recommend", async (c) => {
     // emojiとの類似度を計算
     const result = await c.env.VECTORIZE.query(embedded, {
       topK: 3,
-      namespace: nameSpace,
+      namespace: namespace,
       returnMetadata: "all",
     });
 
